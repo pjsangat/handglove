@@ -1,0 +1,14 @@
+writable/cache/*
+writable/debugbar/*
+writable/session/*
+writable/uploads/*
+writable/logs/*
+
+node_modules/
+console/
+resources/*
+public/uploads/*
+public/leads
+public/leads/*
+.DS_Store
+*.DS_Store
