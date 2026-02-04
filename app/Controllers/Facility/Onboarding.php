@@ -222,7 +222,7 @@ class Onboarding extends BaseController
                             'youtube_link' => $postData['youtube_link'],
                         ];
                         $onboardingObj->save($item);
-
+                        $onboardingID = $onboardingObj->getInsertID(); 
 
                         if ($file && $file->isValid() && $file->getError() == 0) {
                             $orig_filename = $_FILES['pdf']['name'];
@@ -230,12 +230,12 @@ class Onboarding extends BaseController
 
                             if(! $file->hasMoved()) {
                                 $onboardingModel = new FacilityOnboardingModel;
-                                $onboarding = $onboardingModel->find($postData['onboardingID']);
+                                $onboarding = $onboardingModel->find($onboardingID);
                                 if(!empty($onboarding) && !empty($onboarding['filename'])){
                                     @unlink($onboarding['filename']);
                                 }
                                 $filepath = WRITEPATH . 'uploads/' . $file->store();
-                                $onboardingObj->update($postData['onboardingID'], ['filename' => $filepath]);
+                                $onboardingObj->update($onboardingID, ['filename' => $filepath]);
 
                             }
                         }

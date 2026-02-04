@@ -9,6 +9,7 @@ use App\Models\ShiftCliniciansModel;
 use App\Models\ShiftTypesModel;
 use App\Models\ShiftRequestsModel;
 use App\Models\FacilityUnitsModel;
+use App\Models\NotificationsModel;
 use App\Models\UserModel;
 use \Datetime;
 use CodeIgniter\Files\File;
@@ -442,6 +443,10 @@ class Jobs extends BaseController
                             ];
 
                             $id = $objShiftRequest->save($item);
+
+                            $notificationsModel = new NotificationsModel();
+                            $notificationsModel->createNotification($session->get('facility_id'), $this->request->getPost('clinicianID'), 'shift_request', $id);
+
                             $data['message'] = 'Successfully sent a request to clinician';
                             $data['success'] = 1;
 
@@ -498,6 +503,9 @@ class Jobs extends BaseController
 
                                 $data['shift'] = $shift;
                                 if($this->request->getPost('status') == 20){
+                                    $notificationsModel = new NotificationsModel();
+                                    $notificationsModel->createNotification($session->get('facility_id'), $this->request->getPost('clinicianID'), 'approval', $shift['id']);
+                                    
                                     $data['message'] = 'Application accepted successfully.';
 
                                     $item = [

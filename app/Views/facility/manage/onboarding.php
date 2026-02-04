@@ -228,7 +228,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="">PDF File</label>
+                                <label for="">Nurse PDF File</label>
                                <input type="file" class="form-control" name="pdf"  accept=".pdf">
                             </div>
                         </div>
@@ -236,6 +236,14 @@
                             <div class="form-group">
                                 <label for="">Youtube link</label>
                                 <input type="text" name="youtube_link" id="youtube_link_add" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">Supervisor Checklist</label>
+                               <input type="file" class="form-control" name="supervisor_checklist"  accept=".pdf">
                             </div>
                         </div>
                     </div>
