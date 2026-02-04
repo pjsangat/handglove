@@ -58,6 +58,7 @@ class ShiftRequestsModel extends Model
         $db      = \Config\Database::connect();
         $requestArr = $db->table('tbl_client_shift_requests')
                         ->where('tbl_client_shift_requests.clinician_id', $clinician_id)
+                        ->orderBy('tbl_client_shift_requests.shift_id', 'DESC')
                         ->get()
                         ->getResult();
 
@@ -65,7 +66,7 @@ class ShiftRequestsModel extends Model
         $result = [];
         foreach($requestArr as $request){
             $builder = $db->table('tbl_shifts');
-            $query = $builder->select('tbl_shifts.*, tbl_shift_types.name as type_name, tbl_client_units.name as unit_name')
+            $query = $builder->select('tbl_shifts.*, tbl_shift_types.name as type_name, tbl_client_units.name as unit_name, tbl_client_units.census as unit_census')
                             ->join('tbl_client_units', 'tbl_client_units.id = tbl_shifts.unit_id', 'inner')
                             ->join('tbl_shift_types', 'tbl_shift_types.id = tbl_shifts.shift_type', 'inner')
                             ->where('tbl_shifts.id', $request->shift_id)

@@ -13,7 +13,7 @@ class FacilityOnboardingSettingsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['client_id', 'timezone', 'clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone'];
+    protected $allowedFields    = ['client_id', 'timezone', 'clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone', 'allow_overtime'];
 
     // Dates
     protected $useTimestamps = false;

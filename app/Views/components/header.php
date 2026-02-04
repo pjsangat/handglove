@@ -70,6 +70,8 @@
             <?php echo view($key, $style); ?>
         <?php endif; ?>
     <?php endforeach; ?>
+
+    <?php echo view('__compiled_assets__/css/components/notifications.php'); ?>
 </head>
 <body data-scroll-animation="true">
 <div class="tp-home">

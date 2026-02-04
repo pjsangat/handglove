@@ -13,7 +13,7 @@ class FacilityUnitsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['client_id', 'name', 'description'];
+    protected $allowedFields    = ['client_id', 'name', 'description', 'unit_manager_id', 'census'];
 
     // Dates
     protected $useTimestamps = false;

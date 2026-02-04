@@ -512,7 +512,85 @@ class Facility extends BaseController
         pe($email->printDebugger());
     }
 
+
     public function onboarding($facility_id, $onboarding_id){
+        $facilityModel = new FacilityModel;
+        $facility = $facilityModel->find($facility_id);
+        if(!empty($facility)){
+
+            $onboardingModel = new FacilityOnboardingModel;
+            $onboarding = $onboardingModel->find($onboarding_id);
+            if(!empty($onboarding)){
+                $data['onboarding'] = $onboarding;
+                $data['facility'] = $facility;
+                
+                $clinModel = new CliniciansModel;
+                $data['profileData'] = $clinModel->where('email', session()->get('email'))->first();
+
+                // PAGE HEAD PROCESSING
+                $session = session();
+                $data['session'] = $session;
+                
+                return view('components/header', array(
+                    'title' => 'Handglove',
+                    'description' => '',
+                    'url' => BASE_URL,
+                    'keywords' => '',
+                    'meta' => array(
+                        'title' => 'Handglove',
+                        'description' => '',
+                        'image' => IMG_URL . ''
+                    ),
+                    'styles' => array(
+                        'plugins/font_awesome',
+                        'plugins/datatables',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap',
+                        COMPILED_ASSETS_PATH . 'css/components/fontawesome',
+                        COMPILED_ASSETS_PATH . 'css/components/owl',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap-datepicker',
+                        COMPILED_ASSETS_PATH . 'css/components/global',
+                        COMPILED_ASSETS_PATH . 'css/components/animations',
+                        COMPILED_ASSETS_PATH . 'css/components/buttons',
+                        COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
+                        COMPILED_ASSETS_PATH . 'css/components/footer',
+                        COMPILED_ASSETS_PATH . 'css/pages/facility_profile'
+                    ),
+                    'session' => $data['session']
+                ))
+                .view('facility/onboarding', $data)
+                .view('components/scripts_render', array(
+                    'scripts' => array(
+                        'https://code.jquery.com/jquery-3.5.1.min.js' => array(
+                            'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
+                            'crossorigin' => 'anonymous'
+                        ),
+                        'https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.2/datatables.min.js',
+                        ASSETS_URL . 'js/plugins/popper.min.js',
+                        ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
+                        ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
+                        ASSETS_URL . 'js/components/global.min.js',
+                        ASSETS_URL . 'js/plugins/bootstrap-datepicker.js',
+                        ASSETS_URL . 'js/plugins/owl.carousel.min.js',
+                        ASSETS_URL . 'js/components/navigation_bar.min.js',
+                    )
+                ))
+                .view('components/footer');
+            }else{
+                // $this->response->setStatusCode(404, 'Not Found');
+                // return view('errors/html/error_404', $data);
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+            }
+        }else{
+            // $this->response->setStatusCode(404, 'Not Found');
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+
+        }
+
+    }
+
+    public function onboarding_pdf($facility_id, $onboarding_id){
         $facilityModel = new FacilityModel;
         $facility = $facilityModel->find($facility_id);
         if(!empty($facility)){

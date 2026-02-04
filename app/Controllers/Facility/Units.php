@@ -101,6 +101,7 @@ class Units extends BaseController
                         foreach($units as $unit){
                             $item = [
                                 'name' => '<div><strong>'.$unit['name'].'</strong></div>',
+                                'census' => '<div class="text-center">'.$unit['census'].'</div>',
                                 'description' => $unit['description'],
                                 'action' => '<div class="text-center"><a href="javascript:;" data-id="'.$unit['id'].'" class="view-unit btn btn-yellow pl-2 pr-2 pt-1 pb-1" title="View Unit details"><i class="fa fa-search"></i></a></div>'
                             ];
@@ -131,10 +132,17 @@ class Units extends BaseController
                     if($data['facility']){
                         $unitsModel = new FacilityUnitsModel;
 
+                        $census = '1:0';
+                        if(!empty($_POST['census'])){
+                            // if(isset($_POST['census'][0]) && isset($_POST['census'][1])){
+                                $census = implode(":", $_POST['census']);
+                            // }
+                        }
                         $item = [
                             'client_id' => $session->get('facility_id'),
                             'name' => $_POST['name'],
                             'description' => $_POST['description'],
+                            'census' => $census,
                         ];
 
                         $unitsModel->save($item);
@@ -164,10 +172,18 @@ class Units extends BaseController
                     $data['facility'] = $facilityModel->find($session->get('facility_id'));
                     if($data['facility'] && $_POST['unitID']){
                         $unitsModel = new FacilityUnitsModel;
+                        
+                        $census = '1:0';
+                        if(!empty($_POST['census'])){
+                            // if(isset($_POST['census'][0]) && isset($_POST['census'][1])){
+                                $census = implode(":", $_POST['census']);
+                            // }
+                        }
 
                         $item = [
                             'name' => $_POST['name'],
                             'description' => $_POST['description'],
+                            'census' => $census,
                         ];
 
                         $unitsModel->set($item)->where('id', $_POST['unitID'])->update();
@@ -200,6 +216,17 @@ class Units extends BaseController
                     $unit = $unitsModel->find($unitID);
 
                     if($unit){
+                        $census = explode(":", $unit['census']);
+                        if(isset($census[0])){
+                            $unit['census_1'] = $census[0];
+                        }else{
+                            $unit['census_1'] = 0;
+                        }
+                        if(isset($census[1])){
+                            $unit['census_2'] = $census[1];
+                        }else{
+                            $unit['census_2'] = 0;
+                        }
                         $data['success'] = 1;
                         $data['message'] = '';
                         $data['unit'] = $unit;

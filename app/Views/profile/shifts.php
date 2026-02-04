@@ -1,28 +1,6 @@
-<div id="profile-banner">
-    <div class="container">
-        <div class="profile">
-            <div class="profile-img">
-                <img src="<?php echo $profileData['profile_pic_url'] != '' ? $profileData['profile_pic_url'] : base_url('assets/img/blank-img.png'); ?>" alt="">
-            </div>
-            <div class="profile-details">
-                <div class="profile-name">
-                    <h1><?php echo $profileData['name']; ?></h1>
-                </div>
-                <div class="profile-detail-info">
-                    <?php $color = ($profileData['tier'] == 30 ? '#FFD700' : ($profileData['tier'] == 20 ? '#C0C0C0' : '#CD7F32')); ?>
-                    <ul class="profile-agency">
-                        <li><?php echo $profileData['type_name']; ?></li>
-                        <li style="background: #fff;color: <?php echo $color; ?>;border: 1px solid <?php echo $color; ?>;"><i class="fa fa-award"></i> <?php echo ($profileData['tier'] == 30 ? 'Senior' : ($profileData['tier'] == 20 ? 'Reliable' : 'Junior')); ?></li>
-                    </ul>
-                    <ul class="profile-short-info">
-                        <li><i class="fa fa-map-marker-alt"></i> <?php echo $profileData['address']; ?></li>
-                        <li><i class="fa fa-phone"></i> </i> <?php echo $profileData['contact_number']; ?></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+    echo view('profile/includes/profile_banner');
+?>
 
 <div id="profile-bios" class="mb-5">
     <div class="container">

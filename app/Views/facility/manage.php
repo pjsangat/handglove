@@ -1,23 +1,7 @@
-<div id="profile-banner">
-    <div class="container">
-        <div class="profile">
-            <div class="profile-img">
-                <img src="<?php echo (!empty($facility['company_logo']) ? $facility['company_logo'] : base_url('assets/img/blank-img.png')); ?>" alt="">
-            </div>
-            <div class="profile-details">
-                <div class="profile-name">
-                    <h1><?php echo $facility['company_name']; ?></h1>
-                </div>
-                <div class="profile-detail-info">
-                    <ul class="profile-short-info">
-                        <li><i class="fa fa-map-marker-alt"></i> <?php echo $facility['company_address']; ?></li>
-                        <li><i class="fa fa-phone"></i> <?php echo $facility['company_number']; ?></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+    echo view('facility/includes/profile_banner');
+?>
+
 
 <div id="profile-bios">
     <div class="container">

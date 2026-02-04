@@ -10,8 +10,9 @@
         <table id="units_table" class="table table-striped">
             <thead>
                 <tr>
-                    <th style="width: 50%;">Name</th>
-                    <th style="width: 35%;">Description</th>
+                    <th style="width: 40%;">Name</th>
+                    <th style="width: 15%;text-align: center;">Census</th>
+                    <th style="width: 30%;">Description</th>
                     <th style="width: 15%;text-align: center;">Actions</th>
                 </tr>
             </thead>
@@ -55,7 +56,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="">Unit Manager</label>
-                                <select name="" id="" class="selectpicker form-control" data-title="Select unit manager">
+                                <select name="unit_manager_id" id="unit_manager_id" class="selectpicker form-control" data-title="Select unit manager">
                                     <option value="">Supervisor 1</option>
                                     <option value="">Supervisor 2</option>
                                     <option value="">Supervisor 3</option>
@@ -66,7 +67,7 @@
                             <div class="form-group">
                                 <label for="">Census</label>
                                 <div style="display: flex; align-items: center;gap: 20px;">
-                                    <input type="number" min="1" step="1" class="form-control" value="1" style="width: 60px;">:<input type="number" min="1" step="1" class="form-control" style="width: 60px;">
+                                    <input type="number" min="1" step="1" class="form-control" name="census[]" value="" style="width: 60px;">:<input type="number" min="1" step="1" name="census[]" class="form-control" style="width: 60px;">
                                 </div>
                             </div>
                         </div>
@@ -110,6 +111,26 @@
                             <div class="form-group">
                                 <label for="">Description</label>
                                 <textarea class="form-control" id="unitDescription" name="description" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">Unit Manager</label>
+                                <select name="unit_manager_id" id="unit_manager_id" class="selectpicker form-control" data-title="Select unit manager">
+                                    <option value="">Supervisor 1</option>
+                                    <option value="">Supervisor 2</option>
+                                    <option value="">Supervisor 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">Census</label>
+                                <div style="display: flex; align-items: center;gap: 20px;">
+                                    <input type="number" min="1" step="1" class="form-control" value="" style="width: 60px;" name="census[]" id="unitCensus_1">:<input type="number" id="unitCensus_2" min="1" step="1" class="form-control"  name="census[]" style="width: 60px;">
+                                </div>
                             </div>
                         </div>
                     </div>

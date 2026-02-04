@@ -12,6 +12,14 @@ $routes->get('/login', 'Login::index',['filter' => 'authenticate']);
 $routes->get('/login/reset-password/(:segment)', 'Login::reset_password/$1',['filter' => 'authenticate']);
 $routes->post('/login/change-password/', 'Login::change_password',['filter' => 'authenticate']);
 
+$routes->group("notifications", ["namespace" => "App\Controllers"], function ($routes) {
+    $routes->get('', 'NotificationsController::index');
+    $routes->get('manage', 'NotificationsController::index');
+    $routes->post('get_unread', 'NotificationsController::get_unread');
+    $routes->post('mark_all_read', 'NotificationsController::mark_all_read');
+    $routes->post('mark_read/(:num)', 'NotificationsController::mark_read/$1');
+});
+
 $routes->match(['post'], '/login', 'Login::index',['filter' => 'authenticate']);
 $routes->match(['post', 'get'], '/login/forgot-password', 'Login::forgot_password',['filter' => 'authenticate']);
 $routes->get('login/logout', 'Login::logout');
@@ -47,7 +55,8 @@ $routes->group("profile", ["namespace" => "App\Controllers\Clinician"], function
 $routes->get('/facility/', 'Facility::index');
 $routes->get('/facility/manage', 'Facility\Dashboard::index');
 $routes->get('/facility/profile/(:num)', 'Facility::profile/$1');
-$routes->get('/facility/profile/(:num)/onboarding/(:num)/pdf', 'Facility::onboarding/$1/$2');
+$routes->get('/facility/profile/(:num)/onboarding/(:num)/pdf', 'Facility::onboarding_pdf/$1/$2');
+$routes->get('/facility/profile/(:num)/onboarding/(:num)', 'Facility::onboarding/$1/$2');
 $routes->post('/facility/vote', 'Facility::vote');
 $routes->get('/facility/manage/profile', 'Facility\Profile::index');
 // $routes->get('/facility/manage/clinicians', 'Facility\Clinicians::index');
@@ -103,6 +112,7 @@ $routes->group("facility/manage/onboarding", ["namespace" => "App\Controllers\Fa
     $routes->post('get', 'Jobs::get');
     $routes->post('update', 'Onboarding::update');
     $routes->post('edit', 'Onboarding::edit');
+    $routes->post('insert', 'Onboarding::insert');
     $routes->post('update', 'Onboarding::update');
     $routes->post('update_settings', 'Onboarding::update_settings');
 });

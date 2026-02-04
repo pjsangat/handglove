@@ -34,11 +34,11 @@ class Onboarding extends BaseController
             $onboardingSettingsModel = new FacilityOnboardingSettingsModel;
             $onboardingSettings = $onboardingSettingsModel->where('client_id', $session->get('facility_id'))->get()->getRowArray();
 
-            $onboardingSettings['clock_in'] = json_decode($onboardingSettings['clock_in']);
-            $onboardingSettings['access'] = json_decode($onboardingSettings['access']);
-            $onboardingSettings['clock_out_approval'] = json_decode($onboardingSettings['clock_out_approval']);
-            $onboardingSettings['task_delay'] = json_decode($onboardingSettings['task_delay']);
-            $onboardingSettings['back_up_approval'] = json_decode($onboardingSettings['back_up_approval']);
+            $onboardingSettings['clock_in'] = json_decode($onboardingSettings['clock_in'], true);
+            $onboardingSettings['access'] = json_decode($onboardingSettings['access'], true);
+            $onboardingSettings['clock_out_approval'] = json_decode($onboardingSettings['clock_out_approval'], true);
+            $onboardingSettings['task_delay'] = json_decode($onboardingSettings['task_delay'], true);
+            $onboardingSettings['back_up_approval'] = json_decode($onboardingSettings['back_up_approval'], true);
             $onboardingSettings['phone'] = json_decode($onboardingSettings['phone'], true);
 
             $data['onboardingSettings'] = $onboardingSettings;
@@ -64,6 +64,7 @@ class Onboarding extends BaseController
                     COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
                     COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
                     COMPILED_ASSETS_PATH . 'css/components/bootstrap-datepicker',
+                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-switch-toggle',
                     COMPILED_ASSETS_PATH . 'css/components/global',
                     COMPILED_ASSETS_PATH . 'css/components/animations',
                     COMPILED_ASSETS_PATH . 'css/components/buttons',
@@ -85,6 +86,7 @@ class Onboarding extends BaseController
                     ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
                     ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
                     ASSETS_URL . 'js/components/global.min.js',
+                    'https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js',
                     ASSETS_URL . 'js/plugins/bootstrap-datepicker.js',
                     ASSETS_URL . 'js/plugins/owl.carousel.min.js',
                     ASSETS_URL . 'js/components/navigation_bar.min.js',
@@ -97,7 +99,6 @@ class Onboarding extends BaseController
 
 
     public function update(){
-
         $data = [
             'success' => 0, 
             'message' => 'Invalid requests.'
@@ -183,81 +184,69 @@ class Onboarding extends BaseController
         if( $session->get('isLoggedIn') == 1){
             if($this->request->isAJAX()){
                 if($session->get('facility_id') != 0){
-                    $validation =  \Config\Services::validation();
-                    $rules = [
-                        'shift_type' => [
-                            'label' => 'Shift Type',
+                    $postData = $this->request->getPost();
+                    $file = $this->request->getFile('pdf');
+
+                    $validationRules = [
+                        'name' => [
+                            'label' => 'Name',
                             'rules' => 'required',
                         ],
-                        'rate' => [
-                            'label' => 'Rate',
-                            'rules' => 'required',
-                        ],
-                        'unit_id' => [
-                            'label' => 'Unit',
-                            'rules' => 'required',
-                        ],
-                        'date' => [
-                            'label' => 'Shift Date',
-                            'rules' => 'required',
-                        ],
-                        'time' => [
-                            'label' => 'Shift Time',
-                            'rules' => 'required',
-                        ],
-                        'slots' => [
-                            'label' => 'Open Positions',
-                            'rules' => 'required',
-                        ],
+                        'youtube_link' => [
+                            'label' => 'Youbute link',
+                            'rules' => 'permit_empty|valid_url_strict'
+                        ]
                     ];
-                    if ($this->validate($rules)) {
-                        $shift_time = explode(" - ", $this->request->getPost('time'));
 
-
-                        $objShiftsModel = new ShiftsModel;
-                        $item = [
-                            'client_id' => $session->get('facility_id'),
-                            'shift_type' => $this->request->getPost('shift_type'),
-                            'rate' => $this->request->getPost('rate'),
-                            'slots' => $this->request->getPost('slots'),
-                            'unit_id' => $this->request->getPost('unit_id'),
-                            'start_date' => $this->request->getPost('date'),
-                            'status' => 1
+                    if ($file && $file->isValid() && $file->getError() == 0) {
+                        $validationRules['pdf'] = [
+                            'label' => 'PDF File',
+                            'rules' => [
+                                'uploaded[pdf]',
+                                'mime_in[pdf,application/pdf]',
+                                'max_size[pdf, '.(1024 * 5).']',
+                            ],
                         ];
-                        $shift_time = explode(" - ", $this->request->getPost('time'));
-                        $item['shift_start_time'] = date("H:i:s", strtotime($shift_time[0]));
-                        $item['shift_end_time'] = date("H:i:s", strtotime($shift_time[1]));
-
-                        $id = $objShiftsModel->save($item);
-                        if($id){
-                            $data['message'] = 'Shift successfully added';
-                            $data['success'] = 1;
-                        }else{
-                            $data['message'][] = "Error adding shift. Please try again later.";
-                        }
-                    }else{
-                        $data['message'] = $validation->getErrors();
                     }
 
-                        // $facilityModel = new FacilityModel;
-                        // $data['facility'] = $facilityModel->find($session->get('facility_id'));
-                        // if($data['facility']){
-                        //     $unitsModel = new FacilityUnitsModel;
+                    if (!$this->validate($validationRules)) {
+                        $data['message'] = $this->validator->getErrors();
+                    }else{
 
-                        //     $item = [
-                        //         'client_id' => $session->get('facility_id'),
-                        //         'name' => $_POST['name'],
-                        //         'description' => $_POST['description'],
-                        //     ];
+                        $onboardingObj = new FacilityOnboardingModel;
+                        $item = [
+                            'name' => $postData['name'],
+                            'description' => $postData['description'],
+                            'client_id' => $session->get('facility_id'),
+                            'command' => $postData['command'],
+                            'youtube_link' => $postData['youtube_link'],
+                        ];
+                        $onboardingObj->save($item);
 
-                        //     $unitsModel->save($item);
 
-                        //     $data['success'] = 1;
-                        //     $data['message'] = 'Unit successfully added to the database.';
-                        // }
+                        if ($file && $file->isValid() && $file->getError() == 0) {
+                            $orig_filename = $_FILES['pdf']['name'];
+
+
+                            if(! $file->hasMoved()) {
+                                $onboardingModel = new FacilityOnboardingModel;
+                                $onboarding = $onboardingModel->find($postData['onboardingID']);
+                                if(!empty($onboarding) && !empty($onboarding['filename'])){
+                                    @unlink($onboarding['filename']);
+                                }
+                                $filepath = WRITEPATH . 'uploads/' . $file->store();
+                                $onboardingObj->update($postData['onboardingID'], ['filename' => $filepath]);
+
+                            }
+                        }
+                        $data['success'] = 1;
+                        $data['message'] = 'Onboarding file updated successfully.';
+
+                    }
                 }
             }
         }
+
         echo json_encode($data);
         exit();
     }
@@ -286,7 +275,7 @@ class Onboarding extends BaseController
                                 'name' => $onboarding_file['name'],
                                 'pdf' => $onboarding_file['filename'] != '' ? '<div class="text-center"><a href="'.base_url('facility/profile/'.$onboarding_file['client_id'].'/onboarding/'.$onboarding_file['id'].'/pdf').'" target="_blank" style="font-size: 25px;color: red;"><i class="fas fa-file-pdf"></i></a>' : '',
                                 'youtube' => $onboarding_file['youtube_link'] != '' ? '<div class="text-center"><a href="'.$onboarding_file['youtube_link'].'" target="_blank" style="font-size: 25px;color: red;"><i class="fab fa-youtube"></i></a>' : '',
-                                'action' => '<div class="text-center"><a href="javascript:;" data-id="'.$onboarding_file['id'].'" class="update-onboarding btn btn-blue pl-2 pr-2 pt-1 pb-1" title="Update"><i class="fa fa-edit"></i> Update</a></div>'
+                                'action' => '<div class="text-center"><a href="javascript:;" data-id="'.$onboarding_file['id'].'" class="update-onboarding btn btn-blue pl-2 pr-2 pt-1 pb-1" title="Update"><i class="fa fa-edit"></i></a> <a href="'.base_url('facility/profile/'.$onboarding_file['client_id'].'/onboarding/'.$onboarding_file['id']).'" target="_blank" class="btn pl-2 pr-2 pt-1 pb-1" title="View"><i class="fa fa-eye"></i></a></div>'
                             ];
 
 
@@ -318,13 +307,14 @@ class Onboarding extends BaseController
 
                     $item = [
                         'timezone' => $postData['timezone'],
-                        'clock_in' => json_encode($postData['clock_in']),
+                        'clock_in' => isset($postData['clock_in']) ? json_encode($postData['clock_in']) : json_encode([]),
                         'client_id' => $session->get('facility_id'),
-                        'access' => json_encode($postData['access']),
-                        'clock_out_approval' => json_encode($postData['clock_out_approval']),
-                        'task_delay' => json_encode($postData['task_delay']),
-                        'back_up_approval' => json_encode($postData['back_up_approval']),
-                        'phone' => json_encode($postData['phone']),
+                        'access' => isset($postData['access']) ? json_encode($postData['access']) : json_encode([]),
+                        'clock_out_approval' => isset($postData['clock_out_approval']) ? json_encode($postData['clock_out_approval']) : json_encode([]),
+                        'task_delay' => isset($postData['task_delay']) ? json_encode($postData['task_delay']) : json_encode([]),
+                        'back_up_approval' => isset($postData['back_up_approval']) ? json_encode($postData['back_up_approval']) : json_encode([]),
+                        'phone' => isset($postData['phone']) ? json_encode($postData['phone']) : json_encode([]),
+                        'allow_overtime' => isset($postData['allow_overtime']) ? $postData['allow_overtime'] : 0,
                     ];
                     $onboardingSettings = $onboardingSettingsModel->where('client_id', $session->get('facility_id'))->get()->getRowArray();
                     if(empty($onboardingSettings)){
