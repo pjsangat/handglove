@@ -313,6 +313,14 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">Supervisor Checklist</label>
+                               <input type="file" class="form-control" name="supervisor_checklist"  accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="">Command</label>
