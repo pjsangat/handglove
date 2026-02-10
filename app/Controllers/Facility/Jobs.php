@@ -536,4 +536,99 @@ class Jobs extends BaseController
         exit();
     }
 
+    public function view($id){
+        $session = session();
+        $data['session'] = $session;
+        if( is_null($session->get('isLoggedIn')) || $session->get('isLoggedIn') != 1){
+            return redirect()->to('/');
+        }else{
+            if($session->get('facility_id') != 0){
+                $facilityModel = new FacilityModel;
+                $data['facility'] = $facilityModel->find($session->get('facility_id'));
+                if(!$data['facility']){
+                    return redirect()->to('/profile');
+                }
+            }
+
+            $objShiftsModel = new ShiftsModel;
+            $shift = $objShiftsModel
+                        ->select('tbl_shifts.*, tbl_shift_types.name as type_name, tbl_client_units.name as unit_name, (SELECT count(tbl_client_shift_requests.id) FROM tbl_client_shift_requests WHERE tbl_client_shift_requests.client_id = tbl_shifts.client_id AND tbl_client_shift_requests.shift_id = tbl_shifts.id) as applicants_count, (SELECT count(tbl_client_shift_requests.id) FROM tbl_client_shift_requests WHERE tbl_client_shift_requests.client_id = tbl_shifts.client_id AND tbl_client_shift_requests.shift_id = tbl_shifts.id AND status = 20) as accepted_count')
+                        ->join('tbl_client_units', 'tbl_client_units.id = tbl_shifts.unit_id', 'inner')
+                        ->join('tbl_shift_types', 'tbl_shift_types.id = tbl_shifts.shift_type', 'inner')
+                        ->where('tbl_shifts.id', $id)
+                        ->where('tbl_shifts.client_id', $session->get('facility_id'))
+                        ->first();
+
+            if(empty($shift)){
+                return redirect()->to('/facility/manage/jobs');
+            }
+
+            $objShiftRequests = new ShiftRequestsModel;
+            $shift['applicants'] = $objShiftRequests
+                                        ->select('tbl_clinicians.*, tbl_clinician_types.name as type_name, tbl_client_shift_requests.*')
+                                        ->join('tbl_clinicians', 'tbl_clinicians.id = tbl_client_shift_requests.clinician_id', 'INNER')
+                                        ->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type', 'inner')
+                                        ->whereIn('tbl_client_shift_requests.status', [10, 15])
+                                        ->where('tbl_client_shift_requests.shift_id', $id)
+                                        ->findAll();
+
+            $shift['accepted_clinicians'] = $objShiftRequests
+                                        ->select('tbl_clinicians.*, tbl_clinician_types.name as type_name, tbl_client_shift_requests.*')
+                                        ->join('tbl_clinicians', 'tbl_clinicians.id = tbl_client_shift_requests.clinician_id', 'INNER')
+                                        ->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type', 'inner')
+                                        ->where('tbl_client_shift_requests.status', 20)
+                                        ->where('tbl_client_shift_requests.shift_id', $id)
+                                        ->findAll();
+
+            $data['shift'] = $shift;
+            $data['page'] = 'job_view';
+            
+            // PAGE HEAD PROCESSING
+            return view('components/header', array(
+                'title' => 'Shift Details - Handglove',
+                'description' => '',
+                'url' => BASE_URL,
+                'keywords' => '',
+                'meta' => array(
+                    'title' => 'Handglove',
+                    'description' => '',
+                    'image' => IMG_URL . ''
+                ),
+                'styles' => array(
+                    'plugins/font_awesome',
+                    'plugins/datatables',
+                    COMPILED_ASSETS_PATH . 'css/components/bootstrap',
+                    COMPILED_ASSETS_PATH . 'css/components/fontawesome',
+                    COMPILED_ASSETS_PATH . 'css/components/owl',
+                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
+                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
+                    COMPILED_ASSETS_PATH . 'css/components/global',
+                    COMPILED_ASSETS_PATH . 'css/components/animations',
+                    COMPILED_ASSETS_PATH . 'css/components/buttons',
+                    COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
+                    COMPILED_ASSETS_PATH . 'css/components/footer',
+                    COMPILED_ASSETS_PATH . 'css/pages/facility_profile'
+                ),
+                'session' => $data['session']
+            ))
+            .view('facility/manage', $data)
+            .view('components/scripts_render', array(
+                'scripts' => array(
+                    'https://code.jquery.com/jquery-3.5.1.min.js' => array(
+                        'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
+                        'crossorigin' => 'anonymous'
+                    ),
+                    'https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.2/datatables.min.js',
+                    ASSETS_URL . 'js/plugins/popper.min.js',
+                    ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
+                    ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
+                    ASSETS_URL . 'js/components/global.min.js',
+                    ASSETS_URL . 'js/plugins/owl.carousel.min.js',
+                    ASSETS_URL . 'js/components/navigation_bar.min.js',
+                    ASSETS_URL . 'js/pages/facility_jobs_view.min.js',
+                )
+            ))
+            .view('components/footer');
+        }
+    }
 }

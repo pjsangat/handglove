@@ -101,6 +101,7 @@ $routes->group("facility/manage/jobs", ["namespace" => "App\Controllers\Facility
     $routes->post('request', 'Jobs::request');
     $routes->post('requests_list', 'Jobs::requests_list');
     $routes->post('respond', 'Jobs::respond_to_application');
+    $routes->get('view/(:num)', 'Jobs::view/$1');
 });
 
 
@@ -115,6 +116,23 @@ $routes->group("facility/manage/onboarding", ["namespace" => "App\Controllers\Fa
     $routes->post('insert', 'Onboarding::insert');
     $routes->post('update', 'Onboarding::update');
     $routes->post('update_settings', 'Onboarding::update_settings');
+});
+
+
+$routes->group("facility/manage", ["namespace" => "App\Controllers\Facility"], function ($routes) {
+    $routes->group('personnel', function ($routes) {
+        $routes->get('', 'Personnel::index');
+        $routes->post('list', 'Personnel::list');
+        $routes->post('get', 'Personnel::get');
+        $routes->post('add', 'Personnel::insert');
+        $routes->post('update', 'Personnel::update');
+    });
+
+    $routes->group('timekeeping', function ($routes) {
+        $routes->get('', 'Timekeeping::index');
+        $routes->post('list', 'Timekeeping::list');
+        $routes->get('view/(:num)', 'Timekeeping::view/$1');
+    });
 });
 
 

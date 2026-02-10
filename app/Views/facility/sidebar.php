@@ -9,5 +9,6 @@
         <!-- <li class="<?php echo $page == 'shifts' ? 'active' : ''; ?>"><a href="<?php echo base_url('facility/manage/shifts'); ?>">Shifts</a></li> -->
         <li class="<?php echo $page == 'votes' ? 'active' : ''; ?>"><a href="<?php echo base_url('facility/manage/votes'); ?>">Voting</a></li>
         <li class="<?php echo $page == 'personnel' ? 'active' : ''; ?>"><a href="<?php echo base_url('facility/manage/personnel'); ?>">Personnel</a></li>
+        <li class="<?php echo $page == 'timekeeping' ? 'active' : ''; ?>"><a href="<?php echo base_url('facility/manage/timekeeping'); ?>">Time Logs</a></li>
     </ul>                
 </div>

@@ -3,17 +3,17 @@
 namespace App\Models;
 use CodeIgniter\Model;
  
-class UserModel extends Model
+class UserTypesModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'tbl_users';
+    protected $table            = 'tbl_user_types';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $insertID         = 0;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['facility_id', 'first_name', 'last_name', 'contact_number', 'signature', 'date_of_birth', 'email', 'password', 'type', 'token', 'token_active', 'token_datetime', 'status'];
+    protected $allowedFields    = ['name', 'description'];
 
     // Dates
     protected $useTimestamps = false;
