@@ -36,7 +36,7 @@
                     <img src="<?= base_url('assets/img/phone-mockup.png') ?>" alt="Business Profile Mockup" class="img-fluid phone-mockup">
                 </div>
                 <div class="mt-4">
-                    <a href="<?= base_url('demo-request') ?>" class="btn btn-primary start-now-btn">Start now</a>
+                    <a href="<?= base_url('claim') ?>" class="btn btn-primary start-now-btn">Start now</a>
                 </div>
             </div>
         </div>

@@ -1,8 +1,15 @@
-<div id="jobs-container">
+<div id="jobs-container" class="main-pages page-section">
     <div class="container">
+         <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="section-title text-center mb-5">
+                    <h2>Job Search</h2>
+                </div>
+            </div>
+        </div>
         <?php if( !isset($profileData)){ ?>
         <div class="row">
-            <div class="col-md-4 col-lg-3">
+            <div class="col-md-8 col-lg-6">
                 <div class="filler-job-form">
                     <i class="fa fa-clipboard"></i>
                     <select class="form-select form-control selectpicker" data-title="Select Job Type">
