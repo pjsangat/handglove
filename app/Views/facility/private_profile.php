@@ -11,10 +11,10 @@
                         <a class="nav-link active" id="shifts-tab" data-toggle="tab" href="#shifts" role="tab" aria-controls="shifts" aria-selected="true">Shifts</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="shift-requests-tab" data-toggle="tab" href="#shift-requests" role="tab" aria-controls="shift-requests" aria-selected="false">Shift Requests</a>
+                        <a class="nav-link" id="invoices-tab" data-toggle="tab" href="#invoices" role="tab" aria-controls="invoices" aria-selected="false">Invoices</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="pay-stub-tab" data-toggle="tab" href="#pay-stub" role="tab" aria-controls="pay-stub" aria-selected="false">Pay Stub</a>
+                        <a class="nav-link" id="time-logs-tab" data-toggle="tab" href="#time-logs" role="tab" aria-controls="time-logs" aria-selected="false">Time Logs</a>
                     </li>
                 </ul>
                 <div class="tab-content" id="profileTabsContent">
@@ -38,18 +38,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="shift-requests" role="tabpanel" aria-labelledby="shift-requests-tab">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-body">
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="pay-stub" role="tabpanel" aria-labelledby="pay-stub-tab">
+                    <div class="tab-pane fade" id="invoices" role="tabpanel" aria-labelledby="invoices-tab">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="card border-0 shadow-sm">
@@ -154,6 +143,10 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tab-pane fade" id="time-logs" role="tabpanel" aria-labelledby="time-logs-tab">
+                        <div class="row">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="profile-sidebar" class="col-lg-4 col-md-12 col-sm-12 col-12">
@@ -195,10 +188,7 @@
                 </div>
 
                 <div id="callout-heatmap" class="mt-5">
-                    <div class="heatmap-header mb-3">
-                        <span class="blue-dot"></span>
-                        <span class="heatmap-title">Call out <strong>Heatmap</strong></span>
-                    </div>
+                    <h4>Call out Heatmap</h4>
                     <div class="heatmap-grid-container">
                         <div class="heatmap-grid">
                             <!-- Labels -->

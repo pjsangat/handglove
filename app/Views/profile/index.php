@@ -5,85 +5,242 @@
     <div class="container">
         <div class="row">
             <div id="profile-main" class="col-lg-8 col-md-12 col-sm-12 col-12">
-                <div id="skills">
-                    <h2>Job Requests</h2>
-                    <div class="row mb-5">
-                        <div class="col-lg-12">
-                            <?php if (session()->getFlashdata('message') !== NULL) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <?php echo session()->getFlashdata('message'); ?>
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+                <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="job-history-tab" data-toggle="tab" href="#job-history" role="tab" aria-controls="job-history" aria-selected="true">Job History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="shift-requests-tab" data-toggle="tab" href="#shift-requests" role="tab" aria-controls="shift-requests" aria-selected="false">Shift Requests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pay-stub-tab" data-toggle="tab" href="#pay-stub" role="tab" aria-controls="pay-stub" aria-selected="false">Pay Stub</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="profileTabsContent">
+                    <div class="tab-pane fade show active" id="job-history" role="tabpanel" aria-labelledby="job-history-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="heading mb-4">
+                                    <h2>Job History</h2>
                                 </div>
-                            <?php endif; ?>
-                            <table id="requests_table" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 74%;">Details</th>
-                                        <th style="width: 26%;text-align: center;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach($job_requests as $request){ ?>
-                                        <tr>
-                                            <td>
-                                                <div class="shift-view">
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Date</label>
-                                                                <div class="form-details"><?php echo date("M d, Y", strtotime($request['start_date'])); ?></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="">Time</label>
-                                                                <div class="form-details"><?php echo date("h:i A", strtotime($request['shift_start_time'])) . ' - ' . date("h:i A", strtotime($request['shift_end_time'])); ?></div>
-                                                            </div>
-                                                        </div>
+                                
+                                <div class="timeline-container">
+                                    <?php if(!empty($job_history)){ ?>
+                                        <div class="timeline">
+                                            <?php foreach($job_history as $job){ ?>
+                                                <div class="timeline-item">
+                                                    <div class="timeline-date">
+                                                        <div class="year"><?php echo date("M d, Y", strtotime($job['start_date'])); ?></div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Unit</label>
-                                                                <div class="form-details"><?php echo $request['unit_name']; ?></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Census</label>
-                                                                <div class="form-details"><?php echo $request['unit_census']; ?></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Type</label>
-                                                                <div class="form-details"><?php echo $request['type_name']; ?></div>
-                                                            </div>
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <h4 class="title"><?php echo $job['company_name']; ?></h4>
+                                                        <div class="details">
+                                                            <p><i class="far fa-building mr-1"></i> <?php echo $job['unit_name']; ?></p>
+                                                            <p class="text-muted small"><i class="far fa-calendar-alt mr-1"></i> <?php echo date("M d, Y", strtotime($job['start_date'])); ?></p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </td>
-                                                
-                                            <td>
-                                                <?php if($request['request_status'] == 10){ ?>
-                                                    <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 accept_request btn thm-btn">Accept</a>
-                                                    <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 decline_request btn btn-danger">Decline</a>
-                                                <?php }else{ ?>
-                                                    <?php 
-                                                    if($request['request_status'] == 20){
-                                                        echo '<div class="alert alert-success text-center" role="alert">Accepted</div>';
-                                                    }else if($request['request_status'] == 15){
-                                                        echo '<div class="alert alert-secondary text-center" role="alert">Awaiting response</div>';
-                                                    }else{
-                                                        echo '<div class="alert alert-danger text-center" role="alert">Declined</div>';
-                                                    }
-                                                    ?>
-                                                <?php } ?>
-                                            </td>
-                                        </tr>
+                                            <?php } ?>
+                                        </div>
+                                    <?php } else { ?>
+                                        <div class="text-center py-5">
+                                            <p class="text-muted">No completed jobs found.</p>
+                                        </div>
                                     <?php } ?>
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="shift-requests" role="tabpanel" aria-labelledby="shift-requests-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                               <div class="heading">
+                                    <h2>Shift Requests</h2>
+                                </div>
+                                <?php if (session()->getFlashdata('message') !== NULL) : ?>
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <?php echo session()->getFlashdata('message'); ?>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                <?php endif; ?>
+                                <table id="requests_table" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 74%;">Details</th>
+                                            <th style="width: 26%;text-align: center;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach($job_requests as $request){ ?>
+                                            <tr>
+                                                <td>
+                                                    <div class="shift-view">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="">Date</label>
+                                                                    <div class="form-details"><?php echo date("M d, Y", strtotime($request['start_date'])); ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="">Time</label>
+                                                                    <div class="form-details"><?php echo date("h:i A", strtotime($request['shift_start_time'])) . ' - ' . date("h:i A", strtotime($request['shift_end_time'])); ?></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="">Unit</label>
+                                                                    <div class="form-details"><?php echo $request['unit_name']; ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="">Census</label>
+                                                                    <div class="form-details"><?php echo $request['unit_census']; ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="">Type</label>
+                                                                    <div class="form-details"><?php echo $request['type_name']; ?></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                    
+                                                <td>
+                                                    <?php if($request['request_status'] == 10){ ?>
+                                                        <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 accept_request btn thm-btn">Accept</a>
+                                                        <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 decline_request btn btn-danger">Decline</a>
+                                                    <?php }else{ ?>
+                                                        <?php 
+                                                        if($request['request_status'] == 20){
+                                                            echo '<div class="alert alert-success text-center" role="alert">Accepted</div>';
+                                                        }else if($request['request_status'] == 15){
+                                                            echo '<div class="alert alert-secondary text-center" role="alert">Awaiting response</div>';
+                                                        }else{
+                                                            echo '<div class="alert alert-danger text-center" role="alert">Declined</div>';
+                                                        }
+                                                        ?>
+                                                    <?php } ?>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="pay-stub" role="tabpanel" aria-labelledby="pay-stub-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover paystub-table mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="border-top-0 pl-4">Product</th>
+                                                        <th class="border-top-0 text-center">Amount</th>
+                                                        <th class="border-top-0 text-right">Price</th>
+                                                        <th class="border-top-0 text-right pr-4">Price</th>
+                                                        <th class="border-top-0"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="pl-4">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar-wrapper mr-3">
+                                                                    <img src="<?php echo base_url('assets/img/blank-img.png'); ?>" alt="" class="rounded-circle avatar-sm">
+                                                                    <span class="status-indicator online"></span>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="font-weight-bold">Alden Murray</div>
+                                                                    <div class="text-muted small">Customer ID# 00224</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center align-middle">377 <span class="text-muted small">x</span></td>
+                                                        <td class="text-right align-middle font-weight-bold">$ 80.00</td>
+                                                        <td class="text-right align-middle font-weight-bold pr-4">$ 80.00</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="javascript:;" class="text-muted"><i class="fas fa-chevron-right"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="pl-4">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar-wrapper mr-3">
+                                                                    <img src="<?php echo base_url('assets/img/blank-img.png'); ?>" alt="" class="rounded-circle avatar-sm">
+                                                                    <span class="status-indicator online"></span>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="font-weight-bold">outdoor furniture</div>
+                                                                    <div class="text-muted small">Lamp</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center align-middle">337 <span class="text-muted small">x</span></td>
+                                                        <td class="text-right align-middle font-weight-bold">$ 50.00</td>
+                                                        <td class="text-right align-middle font-weight-bold pr-4">$ 50.00</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="javascript:;" class="text-muted"><i class="fas fa-chevron-right"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="pl-4">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar-wrapper mr-3">
+                                                                    <img src="<?php echo base_url('assets/img/blank-img.png'); ?>" alt="" class="rounded-circle avatar-sm">
+                                                                    <span class="status-indicator online"></span>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="font-weight-bold">laundry bag with stand</div>
+                                                                    <div class="text-muted small">Wallet</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center align-middle">217 <span class="text-muted small">x</span></td>
+                                                        <td class="text-right align-middle font-weight-bold">$ 10.00</td>
+                                                        <td class="text-right align-middle font-weight-bold pr-4">$ 10.00</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="javascript:;" class="text-muted"><i class="fas fa-chevron-right"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="pl-4">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar-wrapper mr-3">
+                                                                    <img src="<?php echo base_url('assets/img/blank-img.png'); ?>" alt="" class="rounded-circle avatar-sm">
+                                                                    <span class="status-indicator online"></span>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="font-weight-bold">laundry bag with stand</div>
+                                                                    <div class="text-muted small">Wallet</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center align-middle">217 <span class="text-muted small">x</span></td>
+                                                        <td class="text-right align-middle font-weight-bold">$ 10.00</td>
+                                                        <td class="text-right align-middle font-weight-bold pr-4">$ 10.00</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="javascript:;" class="text-muted"><i class="fas fa-chevron-right"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -204,6 +361,7 @@
         </div>
     </div>
 </div>
+
 
 
 <div class="modal fade" id="availabilityModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

@@ -54,6 +54,9 @@ class Profile extends BaseController
             $objShiftRequest = new ShiftRequestsModel;
             $data['job_requests'] = $objShiftRequest->getRequests($data['profileData']['id']);
 
+            $objShifts = new ShiftsModel;
+            $data['job_history'] = $objShifts->getJobHistory($data['profileData']['id'], 3);
+
             // PAGE HEAD PROCESSING
             return view('components/header', array(
                 'title' => 'Handglove',
@@ -107,79 +110,85 @@ class Profile extends BaseController
     function public_profile($clinician_id){
             $credentialTypeModel = new CredentialTypesModel;
             $clinModel = new CliniciansModel;
-            $clinCredsModel = new ClinicianCredentialsModel;
-
-            $data['credential_types'] = $credentialTypeModel->where('status', 1)->findAll();
             $data['profileData'] = $clinModel
                                         ->select('tbl_clinicians.*, tbl_clinician_types.name as type_name')
                                         ->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type', 'INNER')
-                                        ->where('tbl_clinicians.email', session()->get('email'))
+                                        ->where('tbl_clinicians.id', $clinician_id)
                                         ->first();
+            if(!empty($data['profileData'])){
+                $clinCredsModel = new ClinicianCredentialsModel;
 
-            $credentials = $clinCredsModel->where('clinician_id', $data['profileData']['id'])->findAll();
-            foreach($credentials as $credential){
-                $data['profileData']['credentials'][$credential['credential_id']] = $credential;
-            }
-            $objClinReferrals = new ClinicianReferralsModel;
-            $referral_arr = $objClinReferrals->where('clinician_id', $data['profileData']['id'])
-                                    ->findAll();
+                $data['credential_types'] = $credentialTypeModel->where('status', 1)->findAll();
 
-            
-            $referrals = [];
-            foreach($referral_arr as $ref){
-                $supervisor = $clinModel->find($ref['supervisor_id']);
-                $referrals[] = $supervisor;
-            }
-            $data['referrals'] = $referrals;
-            $objShiftRequest = new ShiftRequestsModel;
-            $data['job_requests'] = $objShiftRequest->getRequests($data['profileData']['id']);
+                $credentials = $clinCredsModel->where('clinician_id', $data['profileData']['id'])->findAll();
+                foreach($credentials as $credential){
+                    $data['profileData']['credentials'][$credential['credential_id']] = $credential;
+                }
+                $objClinReferrals = new ClinicianReferralsModel;
+                $referral_arr = $objClinReferrals->where('clinician_id', $data['profileData']['id'])
+                                        ->findAll();
 
-            // PAGE HEAD PROCESSING
-            return view('components/header', array(
-                'title' => 'Handglove',
-                'description' => '',
-                'url' => BASE_URL,
-                'keywords' => '',
-                'meta' => array(
+                
+                $referrals = [];
+                foreach($referral_arr as $ref){
+                    $supervisor = $clinModel->find($ref['supervisor_id']);
+                    $referrals[] = $supervisor;
+                }
+                $data['referrals'] = $referrals;
+                $objShiftRequest = new ShiftRequestsModel;
+                $data['job_requests'] = $objShiftRequest->getRequests($data['profileData']['id']);
+
+                $objShifts = new ShiftsModel;
+                $data['job_history'] = $objShifts->getJobHistory($data['profileData']['id'], 3);
+
+                // PAGE HEAD PROCESSING
+                return view('components/header', array(
                     'title' => 'Handglove',
                     'description' => '',
-                    'image' => IMG_URL . ''
-                ),
-                'styles' => array(
-                    'plugins/font_awesome',
-                    'plugins/datatables',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap',
-                    COMPILED_ASSETS_PATH . 'css/components/fontawesome',
-                    COMPILED_ASSETS_PATH . 'css/components/owl',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
-                    COMPILED_ASSETS_PATH . 'css/components/global',
-                    COMPILED_ASSETS_PATH . 'css/components/animations',
-                    COMPILED_ASSETS_PATH . 'css/components/buttons',
-                    COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
-                    COMPILED_ASSETS_PATH . 'css/components/footer',
-                    COMPILED_ASSETS_PATH . 'css/pages/profile'
-                ),
-                'session' => $data['session']
-            ))
-            .view('profile/public', $data)
-            .view('components/scripts_render', array(
-                'scripts' => array(
-                    'https://code.jquery.com/jquery-3.5.1.min.js' => array(
-                        'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
-                        'crossorigin' => 'anonymous'
+                    'url' => BASE_URL,
+                    'keywords' => '',
+                    'meta' => array(
+                        'title' => 'Handglove',
+                        'description' => '',
+                        'image' => IMG_URL . ''
                     ),
-                    'https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.2/datatables.min.js',
-                    ASSETS_URL . 'js/plugins/popper.min.js',
-                    ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
-                    ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
-                    ASSETS_URL . 'js/components/global.min.js',
-                    ASSETS_URL . 'js/plugins/owl.carousel.min.js',
-                    ASSETS_URL . 'js/components/navigation_bar.min.js',
-                    ASSETS_URL . 'js/pages/profile.min.js',
-                )
-            ))
-            .view('components/footer');
+                    'styles' => array(
+                        'plugins/font_awesome',
+                        'plugins/datatables',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap',
+                        COMPILED_ASSETS_PATH . 'css/components/fontawesome',
+                        COMPILED_ASSETS_PATH . 'css/components/owl',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
+                        COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
+                        COMPILED_ASSETS_PATH . 'css/components/global',
+                        COMPILED_ASSETS_PATH . 'css/components/animations',
+                        COMPILED_ASSETS_PATH . 'css/components/buttons',
+                        COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
+                        COMPILED_ASSETS_PATH . 'css/components/footer',
+                        COMPILED_ASSETS_PATH . 'css/pages/profile'
+                    ),
+                ))
+                .view('profile/public', $data)
+                .view('components/scripts_render', array(
+                    'scripts' => array(
+                        'https://code.jquery.com/jquery-3.5.1.min.js' => array(
+                            'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
+                            'crossorigin' => 'anonymous'
+                        ),
+                        'https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.2/datatables.min.js',
+                        ASSETS_URL . 'js/plugins/popper.min.js',
+                        ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
+                        ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
+                        ASSETS_URL . 'js/components/global.min.js',
+                        ASSETS_URL . 'js/plugins/owl.carousel.min.js',
+                        ASSETS_URL . 'js/components/navigation_bar.min.js',
+                        ASSETS_URL . 'js/pages/profile.min.js',
+                    )
+                ))
+                .view('components/footer');
+            }else{
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+            }
     }
 
     public function edit()

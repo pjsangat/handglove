@@ -70,6 +70,39 @@ class ShiftsModel extends Model
         $builder->where('(SELECT count(id) FROM tbl_shift_clinicians WHERE tbl_shift_clinicians.shift_id = tbl_shifts.id) < tbl_shifts.slots');
         $query = $builder->get();
 
-        return $query->getResult();
+    }
+
+    function getJobHistory($clinician_id, $limit = 3)
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('tbl_shifts');
+        
+        $cols = [
+            'tbl_shifts.id',
+            'tbl_shifts.start_date',
+            'tbl_shifts.shift_start_time',
+            'tbl_shifts.shift_end_time',
+            'tbl_shifts.client_id',
+            'tbl_clients.company_name',
+            'tbl_client_units.name as unit_name',
+        ];
+
+        /*
+            Subqueries for clock in and clock out to ensure we only get shifts with BOTH punches
+            punch_type 10 = clock in
+            punch_type 20 = clock out
+        */
+        $builder->select(implode(",", $cols));
+        $builder->join('tbl_clients', 'tbl_clients.id = tbl_shifts.client_id', 'inner');
+        $builder->join('tbl_client_units', 'tbl_client_units.id = tbl_shifts.unit_id', 'inner');
+        $builder->join('tbl_shift_clinicians', 'tbl_shift_clinicians.shift_id = tbl_shifts.id');
+        $builder->where('tbl_shift_clinicians.clinician_id', $clinician_id);
+        $builder->orderBy('tbl_shifts.start_date', 'DESC');
+        $builder->orderBy('tbl_shifts.shift_start_time', 'DESC');
+        $builder->groupBy('tbl_shifts.id');
+        $builder->limit($limit);
+        
+        $query = $builder->get();
+        return $query->getResultArray();
     }
 }

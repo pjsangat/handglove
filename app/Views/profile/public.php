@@ -6,88 +6,53 @@
     <div class="container">
         <div class="row">
             <div id="profile-main" class="col-lg-8 col-md-12 col-sm-12 col-12">
-                <div id="skills">
-                    <h2>Job Requests</h2>
-                    <div class="row mb-5">
-                        <div class="col-lg-12">
-                            <?php if (session()->getFlashdata('message') !== NULL) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <?php echo session()->getFlashdata('message'); ?>
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+                <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="job-history-tab" data-toggle="tab" href="#job-history" role="tab" aria-controls="job-history" aria-selected="true">Job History</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="profileTabsContent">
+                    <div class="tab-pane fade show active" id="job-history" role="tabpanel" aria-labelledby="job-history-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="heading mb-4">
+                                    <h2>Job History</h2>
                                 </div>
-                            <?php endif; ?>
-                            <table id="requests_table" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 75%;">Details</th>
-                                        <th style="width: 200px;text-align: center;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach($job_requests as $request){ ?>
-                                        <tr>
-                                            <td>
-                                                <div class="shift-view">
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Date</label>
-                                                                <div class="form-details"><?php echo date("M d, Y", strtotime($request['start_date'])); ?></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="">Time</label>
-                                                                <div class="form-details"><?php echo date("h:i A", strtotime($request['shift_start_time'])) . ' - ' . date("h:i A", strtotime($request['shift_end_time'])); ?></div>
-                                                            </div>
-                                                        </div>
+                                
+                                <div class="timeline-container">
+                                    <?php if(!empty($job_history)){ ?>
+                                        <div class="timeline">
+                                            <?php foreach($job_history as $job){ ?>
+                                                <div class="timeline-item">
+                                                    <div class="timeline-date">
+                                                        <div class="year"><?php echo date("M d, Y", strtotime($job['start_date'])); ?></div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Unit</label>
-                                                                <div class="form-details"><?php echo $request['unit_name']; ?></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="">Unit</label>
-                                                                <div class="form-details"><?php echo $request['type_name']; ?></div>
-                                                            </div>
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <h4 class="title"><a href="<?php echo base_url('facility/profile/'.$job['client_id']); ?>"><?php echo $job['company_name']; ?></a></h4>
+                                                        <div class="details">
+                                                            <p><i class="far fa-building mr-1"></i> <?php echo $job['unit_name']; ?></p>
+                                                            <p class="text-muted small"><i class="far fa-calendar-alt mr-1"></i> <?php echo date("M d, Y", strtotime($job['start_date'])); ?></p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </td>
-                                                
-                                            <td>
-                                                
-                                                <?php if($request['request_status'] == 10){ ?>
-                                                    <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 accept_request btn thm-btn">Accept</a>
-                                                    <a href="javascript:;" data-request-id="<?php echo $request['request_id']; ?>" data-shift-id="<?php echo $request['id']; ?>" data-client-id="<?php echo $request['client_id']; ?>" class="pl-3 pt-1 pb-1 pr-3 decline_request btn btn-danger">Decline</a>
-                                                <?php }else{ ?>
-                                                    <?php 
-                                                    if($request['request_status'] == 20){
-                                                        echo '<div class="alert alert-success text-center" role="alert">Accepted</div>';
-                                                    }else if($request['request_status'] == 15){
-                                                        echo '<div class="alert alert-secondary text-center" role="alert">Awaiting response</div>';
-                                                    }else{
-                                                        echo '<div class="alert alert-danger text-center" role="alert">Declined</div>';
-                                                    }
-                                                    ?>
-                                                <?php } ?>
-                                            </td>
-                                        </tr>
+                                            <?php } ?>
+                                        </div>
+                                    <?php } else { ?>
+                                        <div class="text-center py-5">
+                                            <p class="text-muted">No completed jobs found.</p>
+                                        </div>
                                     <?php } ?>
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
             <div id="profile-sidebar" class="col-lg-4 col-md-12 col-sm-12 col-12">
-                <h3>Overview</h3>
-                <div class="divider"></div>
-                <div class="sidebar-list-job mt-10">
+                <!-- <div class="sidebar-list-job mt-10"> -->
                     <!-- <ul>
                         <li>
                             <div class="sidebar-icon-item"><i class="fa fa-briefcase"></i></div>
@@ -118,14 +83,9 @@
                             </div>
                         </li>
                     </ul> -->
-                </div>
-                <div class="divider"></div>
-                <div class="buttons">
-                    <button class="btn thm-btn-secondary" data-toggle="modal" data-target="#uploadModal">Credentials</button>
-                    <button class="btn thm-btn-white" data-toggle="modal" data-target="#availabilityModal">Availability</button>
-                </div>
+                <!-- </div> -->
                 <div id="connector">
-                    <h4>Referrals</h4>
+                    <h5>Referrals</h5>
                     <?php if(!empty($referrals)){ ?>
                         <ul id="connector_list" class="mb-3">
                             <?php foreach($referrals as $clinician){ ?>
@@ -135,10 +95,13 @@
                             <?php } ?>
                         </ul>
                     <?php } ?>
-
-                    <a href="<?php echo base_url('employee-award'); ?>" class="btn thm-btn">Add a Referral</a>
-
                 </div>
+                <div class="divider"></div>
+
+                <div id="availabilit">
+                    <h5>Availability</h5>
+                </div>
+                <div class="divider"></div>
             </div>
         </div>
     </div>

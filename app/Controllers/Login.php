@@ -90,7 +90,7 @@ class Login extends BaseController
                 ASSETS_URL . 'js/components/global.min.js',
                 ASSETS_URL . 'js/plugins/owl.carousel.min.js',
                 ASSETS_URL . 'js/components/navigation_bar.min.js',
-                ASSETS_URL . 'js/pages/home.min.js',
+                // ASSETS_URL . 'js/pages/home.min.js',
             )
         ));
         // .view('components/footer');
@@ -119,7 +119,7 @@ class Login extends BaseController
             }
         }
 
-        return view('components/header', array(
+        return view('components/header_no_nav', array(
             'title' => 'Reset Password',
             'description' => '',
             'url' => BASE_URL,
@@ -240,7 +240,7 @@ class Login extends BaseController
             }
         }
 
-        return view('components/header', array(
+        return view('components/header_no_nav', array(
             'title' => 'Forgot Password',
             'description' => '',
             'url' => BASE_URL,
@@ -276,7 +276,7 @@ class Login extends BaseController
                 ASSETS_URL . 'js/components/global.min.js',
                 ASSETS_URL . 'js/plugins/owl.carousel.min.js',
                 ASSETS_URL . 'js/components/navigation_bar.min.js',
-                ASSETS_URL . 'js/pages/home.min.js',
+                // ASSETS_URL . 'js/pages/home.min.js',
             )
         ));
 

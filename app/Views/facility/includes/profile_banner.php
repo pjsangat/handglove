@@ -6,7 +6,7 @@
             </div>
             <div class="profile-details">
                 <div class="profile-name">
-                    <h1><?php echo $facility['company_name']; ?></h1>
+                    <h2><?php echo $facility['company_name']; ?></h2>
                 </div>
                 <div class="profile-extras">
                     <div class="profile-detail-info">
@@ -35,7 +35,7 @@
                             <div class="circle-card">
                                 <div class="circle" data-percent="6" style="background: conic-gradient(#3bb4e5 <?php echo 6*3.6.'deg'; ?>, #eee <?php echo 6*3.6.'deg'; ?>);"></div>
                                 <div class="card-counter">6%</div>
-                                <p>Task Delay</p>
+                                <p>Work Friendly</p>
                             </div>
                         </div>
                     </div>

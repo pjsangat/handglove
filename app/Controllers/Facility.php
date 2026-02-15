@@ -36,6 +36,31 @@ class Facility extends BaseController
             $objUnits = new FacilityUnitsModel;
             $units = $objUnits->where('client_id', $session->get('facility_id'))->findAll();
 
+            $objVotes = new FacilityVotesModel;
+            $votingArr_ = $objVotes->where('"'.date("Y-m-d") . '" BETWEEN voting_start_date AND voting_end_date')->where('client_id', $session->get('facility_id'))->findAll();
+            if(!empty($votingArr_)){
+                $votingArr = [];
+                foreach($votingArr_ as $voting){
+                    $objVoteDetails = new FacilityVoteDetailsModel;
+                    $voting['details'] = $objVoteDetails->where('voting_id', $voting['id'])->findAll();
+                    if(!empty($voting['details'])){
+                        $total_votes = 0;
+                        foreach($voting['details'] as $ctr => $detail){
+                            $total_votes += $detail['votes'];
+                            $clinModel = new CliniciansModel;
+                            $voting['details'][$ctr]['clinician_details'] = $clinModel->find($detail['clinician_id']);
+                        }
+                        $voting['total_votes'] = $total_votes;
+
+                        foreach($voting['details'] as $ctr => $detail){
+                            $voting['details'][$ctr]['vote_percentage'] = $total_votes > 0 ? ($detail['votes'] / $total_votes) * 100 : 0;
+                        }
+                    }
+                    $votingArr[] = $voting;
+                }
+                $data['votingArr'] = $votingArr;
+            }
+
             $data['units'] = $units;
             // PAGE HEAD PROCESSING
             return view('components/header', array(
@@ -108,9 +133,11 @@ class Facility extends BaseController
             if(!empty($votingArr_)){
                 $votingArr = [];
                 foreach($votingArr_ as $voting){
-                    $objVotingModel = new FacilityVotingModel;
-
-                    $hasVoted = $objVotingModel->where('voting_id', $voting['id'])->where('profile_id', $data['profileData']['id'])->findAll();
+                    $hasVoted = [];
+                    if(!empty($data['profileData'])){
+                        $objVotingModel = new FacilityVotingModel;
+                        $hasVoted = $objVotingModel->where('voting_id', $voting['id'])->where('profile_id', $data['profileData']['id'])->findAll();
+                    }
                     if(!empty($hasVoted)){
                         $voting['hasVoted'] = true;
                     }else{
@@ -214,6 +241,7 @@ class Facility extends BaseController
                     $test = $voteDetailsModel->where('voting_id', $this->request->getPost('votingID'))->where('clinician_id', $this->request->getPost('clinicianID'))->set('votes','tbl_client_voting_details.votes+1',false)->update();
 
                     $data['success'] = 1;
+                    $data['message_header'] = 'Voting';
                     $data['message'] = 'We got your vote! We appreciate your participation in this voting process. Thank you.';
                 }
             }

@@ -86,10 +86,10 @@
             </div>
             <div class="modal-body">
                 <div id="requestConfirmation"></div>
-                <div class="punchDetails">
+                <div class="punchDetails text-left">
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <div class="clockOutDate"></div>
+                            <div class="clockOutDate text-center"></div>
                         </div>
                     </div>
                     <div class="row">
@@ -107,7 +107,27 @@
                     </div>
                 </div>
 
-                <div class="form-group mt-3">
+                <div class="row mt-3 ">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">PDC</label>
+                            <select name="pdc" id="pdc" class="form-control selectpicker">
+                                <option value="0">Incomplete</option>
+                                <option value="10">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group ">
+                            <label for="">ADL</label>
+                            <select name="adl" id="adl" class="form-control selectpicker">
+                                <option value="0">Incomplete</option>
+                                <option value="10">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mt-3" id="supervisorSignature">
                     <label for="">Supervisor Signature</label>
                     <div id="signature-pad" class="signature-pad text-center">
                         <div id="canvas-wrapper" class="signature-pad--body" style="text-align: center;">

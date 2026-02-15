@@ -1,0 +1,1 @@
+<style>#admin-sidebar .admin_nav{list-style:none;padding:0;margin:0}#admin-sidebar .admin_nav li{border-bottom:1px solid #dfe5e5;margin-bottom:10px;padding:10px}#admin-sidebar .admin_nav li a{font-size:15px;color:#727272}#admin-sidebar .admin_nav li.active a{font-weight:700;color:#007bff}</style>

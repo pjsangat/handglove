@@ -6,7 +6,7 @@
             </div>
             <div class="profile-details">
                 <div class="profile-name">
-                    <h1><?php echo $profileData['name']; ?></h1>
+                    <h2><?php echo $profileData['name']; ?></h2>
                 </div>
                 <div class="profile-extras">
                     <div class="profile-detail-info">
