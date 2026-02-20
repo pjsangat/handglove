@@ -96,8 +96,37 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Accepted Per Diem Network</label>
+                                        <select name="accepted_per_diem_network[]" data-title="Select per diem network.." id="accepted_per_diem_network" class="selectpicker form-control" multiple>
+                                            <option value="ConnectRN" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('ConnectRN', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>ConnectRN</option>
+                                            <option value="Shiftkey" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('Shiftkey', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>Shiftkey</option>
+                                            <option value="Shiftmed" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('Shiftmed', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>Shiftmed</option>
+                                            <option value="CSU" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('CSU', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>CSU</option>
+                                            <option value="Clipboard" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('Clipboard', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>Clipboard</option>
+                                            <option value="Eshift" <?php echo (isset($onboardingSettings['accepted_per_diem_network']) && in_array('Eshift', $onboardingSettings['accepted_per_diem_network']) ? 'selected' : '' ); ?>>Eshift</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Total Beds</label>
+                                        <input type="number" name="total_beds" value="<?php echo (isset($onboardingSettings['total_beds']) ? $onboardingSettings['total_beds'] : '' ); ?>" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Average Census</label>
+                                        <div style="display: flex; align-items: center;gap: 20px;">
+                                            <input type="number" min="1" step="1" class="form-control" name="average_census[]" value="<?php echo $onboardingSettings['average_census_1']; ?>" style="width: 80px;">:<input type="number" min="1" step="1" name="average_census[]" class="form-control" value="<?php echo $onboardingSettings['average_census_2']; ?>" style="width: 80px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">

@@ -13,7 +13,7 @@ class LeadsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['company_name', 'address', 'email', 'contact_number', 'zip_code', 'origin', 'status', 'ref_clinician_id', 'census', 'features', 'provider_id', 'country', 'state'];
+    protected $allowedFields    = ['company_name', 'address', 'email', 'contact_number', 'zip_code', 'origin', 'status', 'ref_clinician_id', 'census', 'features', 'provider_id', 'country', 'state', 'booking_date', 'booking_time'];
 
     // Dates
     protected $useTimestamps = false;

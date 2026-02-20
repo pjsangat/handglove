@@ -1,5 +1,5 @@
 <?php
-    echo view('facility/includes/profile_banner');
+    //echo view('facility/includes/profile_banner');
 ?>
 
 

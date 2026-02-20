@@ -45,7 +45,7 @@ class Votes extends BaseController
         $data = [
             'session' => $this->session,
             'facility' => $facility,
-            'clinicians' => $this->clinicianModel->where('client_id', $this->session->get('facility_id'))->findAll(),
+            'clinicians' => $this->clinicianModel->select('tbl_clinicians.*,tbl_clinician_types.name as clinician_type_name, tbl_clinician_types.grouping as clinician_type_grouping')->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type')->where('client_id', $this->session->get('facility_id'))->findAll(),
             'page' => 'votes'
         ];
 
@@ -123,7 +123,11 @@ class Votes extends BaseController
                 ),
                 'description' => $vote['description'],
                 'action' => sprintf(
-                    '<div class="text-center"><a href="javascript:;" data-id="%s" class="view-unit btn btn-yellow pl-2 pr-2 pt-1 pb-1" title="View Results"><i class="fa fa-search"></i> View Results</a></div>',
+                    '<div class="text-center">
+                        <a href="javascript:;" data-id="%s" class="view-unit btn btn-yellow pl-2 pr-2 pt-1 pb-1" title="View Results"><i class="fa fa-search"></i></a>
+                        <a href="javascript:;" data-id="%s" class="remove-unit btn btn-danger pl-2 pr-2 pt-1 pb-1" title="Delete"><i class="fa fa-trash"></i></a>
+                    </div>',
+                    $vote['id'],
                     $vote['id']
                 )
             ];
@@ -148,12 +152,12 @@ class Votes extends BaseController
         }
 
         $rules = [
-            'voting_start_date' => [
-                'label' => 'Voting Start Date',
+            'voting_week' => [
+                'label' => 'Voting Week',
                 'rules' => 'required'
             ],
-            'voting_end_date' => [
-                'label' => 'Voting End Date',
+            'voting_type' => [
+                'label' => 'Voting Type',
                 'rules' => 'required'
             ],
             'description' => [
@@ -170,11 +174,15 @@ class Votes extends BaseController
             ]);
         }
 
+        $votingWeek = $this->request->getPost('voting_week');
+        $dates = explode('|', $votingWeek);
+        
         $item = [
             'client_id' => $facilityId,
-            'voting_start_date' => $this->request->getPost('voting_start_date'),
-            'voting_end_date' => $this->request->getPost('voting_end_date'),
+            'voting_start_date' => $dates[0],
+            'voting_end_date' => $dates[1],
             'description' => $this->request->getPost('description'),
+            'voting_type' => $this->request->getPost('voting_type'),
             'status' => 10
         ];
 
@@ -237,7 +245,7 @@ class Votes extends BaseController
             $totalVotes = 0;
             foreach ($vote['details'] as &$detail) {
                 $totalVotes += $detail['votes'];
-                $detail['clinician_details'] = $this->clinicianModel->find($detail['clinician_id']);
+                $detail['clinician_details'] = $this->clinicianModel->select('tbl_clinicians.*,tbl_clinician_types.name as clinician_type_name, tbl_clinician_types.grouping as clinician_type_grouping')->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type')->find($detail['clinician_id']);
             }
             unset($detail);
 
@@ -253,6 +261,46 @@ class Votes extends BaseController
             'success' => 1,
             'message' => '',
             'unit' => $vote // returning as 'unit' to match original key
+        ]);
+    }
+
+    public function delete()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Invalid request.']);
+        }
+
+        $facilityId = $this->session->get('facility_id');
+        if ($facilityId == 0) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Unauthorized.']);
+        }
+
+        $voteId = $this->request->getPost('unitID');
+        if (!$voteId) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Missing parameter.']);
+        }
+
+        $vote = $this->votesModel->where('client_id', $facilityId)->find($voteId);
+        if (!$vote) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Record not found or unauthorized.']);
+        }
+
+        // Delete details first
+        $this->voteDetailsModel->where('voting_id', $voteId)->delete();
+        
+        // Delete main record
+        if ($this->votesModel->delete($voteId)) {
+            return $this->response->setJSON([
+                'success' => 1,
+                'message_header' => 'Votes',
+                'message' => 'Voting session successfully deleted.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => 0,
+            'message_header' => 'Votes',
+            'message' => 'Unable to delete. Please try again later.'
         ]);
     }
 }

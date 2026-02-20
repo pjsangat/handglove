@@ -26,22 +26,28 @@
                         <div class="no-of-shifts-cont stats">
                             <div class="person-card">
                                 <i class="fa fa-user"></i>
-                                <div class="card-counter">400+</div>
+                                <?php 
+                                $totalShifts = $profileData['total_shifts'] ?? 0;
+                                $displayShifts = $totalShifts > 999 ? '999+' : $totalShifts;
+                                ?>
+                                <div class="card-counter"><?php echo $displayShifts; ?></div>
                                 <p>Shifts</p>
                             </div>
 
                         </div>
                         <div class="attendance-cont stats">
                             <div class="circle-card">
-                                <div class="circle" data-percent="85" style="background: conic-gradient(#3bb4e5 <?php echo 85*3.6.'deg'; ?>, #eee <?php echo 85*3.6.'deg'; ?>);"></div>
-                                <div class="card-counter">85%</div>
+                                <?php $attPer = $profileData['attendance_percentage'] ?? 0; ?>
+                                <div class="circle" data-percent="<?= $attPer ?>" style="background: conic-gradient(#3bb4e5 <?php echo $attPer*3.6.'deg'; ?>, #eee <?php echo $attPer*3.6.'deg'; ?>);"></div>
+                                <div class="card-counter"><?= $attPer ?>%</div>
                                 <p>Attendance</p>
                             </div>
                         </div>
                         <div class="tardiness-cont stats">
                             <div class="circle-card">
-                                <div class="circle" data-percent="6" style="background: conic-gradient(#3bb4e5 <?php echo 6*3.6.'deg'; ?>, #eee <?php echo 6*3.6.'deg'; ?>);"></div>
-                                <div class="card-counter">6%</div>
+                                <?php $latePer = $profileData['lateness_percentage'] ?? 0; ?>
+                                <div class="circle" data-percent="<?= $latePer ?>" style="background: conic-gradient(#3bb4e5 <?php echo $latePer*3.6.'deg'; ?>, #eee <?php echo $latePer*3.6.'deg'; ?>);"></div>
+                                <div class="card-counter"><?= $latePer ?>%</div>
                                 <p>Lateness</p>
                             </div>
                         </div>

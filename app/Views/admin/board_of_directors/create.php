@@ -7,8 +7,8 @@
 <div class="row">
     <div class="col-12">
         <div class="heading mb-4">
-            <h2>Board Members</h2>
-            <div class="kicker-bottom">Add New Board Member</div>
+            <h2>Advisors</h2>
+            <div class="kicker-bottom">Add New Advisor</div>
 
         </div>
 
@@ -89,7 +89,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" id="submit-btn" class="btn thm-btn">Save Member</button>
+                        <button type="submit" id="submit-btn" class="btn thm-btn">Save Advisor</button>
                         <a href="<?= base_url('admin/board-of-directors') ?>" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>

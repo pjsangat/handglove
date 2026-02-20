@@ -60,9 +60,18 @@ class Onboarding extends BaseController
         $onboardingSettings = $this->facilityOnboardingSettingsModel->where('client_id', $this->session->get('facility_id'))->first();
 
         // Standardize Decoding
-        $decodeFields = ['clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone'];
+        $decodeFields = ['clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone', 'accepted_per_diem_network'];
         foreach ($decodeFields as $field) {
             $onboardingSettings[$field] = json_decode($onboardingSettings[$field] ?? '[]', true);
+        }
+
+        if (isset($onboardingSettings['average_census'])) {
+            $census = explode(':', $onboardingSettings['average_census']);
+            $onboardingSettings['average_census_1'] = $census[0] ?? '';
+            $onboardingSettings['average_census_2'] = $census[1] ?? '';
+        } else {
+            $onboardingSettings['average_census_1'] = '';
+            $onboardingSettings['average_census_2'] = '';
         }
 
         $data = [
@@ -295,13 +304,35 @@ class Onboarding extends BaseController
         }
 
         $postData = $this->request->getPost();
-        $fields = ['clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone'];
+        
+        $rules = [
+            'average_census.*' => [
+                'label' => 'Average Census',
+                'rules' => 'permit_empty|numeric'
+            ]
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => 0,
+                'message_header' => 'Onboarding',
+                'message' => implode('<br>', $this->validator->getErrors())
+            ]);
+        }
+
+        $fields = ['clock_in', 'access', 'clock_out_approval', 'task_delay', 'back_up_approval', 'phone', 'accepted_per_diem_network'];
+        
+        $censusInput = $this->request->getPost('average_census');
+        $averageCensus = ($censusInput && count($censusInput) == 2) ? implode(':', $censusInput) : null;
+
         $item = [
             'timezone' => $postData['timezone'],
             'client_id' => $facilityId,
             'allow_overtime' => $postData['allow_overtime'] ?? 0,
+            'total_beds' => $postData['total_beds'] ?? null,
+            'average_census' => $averageCensus,
         ];
-
+        
         foreach ($fields as $field) {
             $item[$field] = isset($postData[$field]) ? json_encode($postData[$field]) : json_encode([]);
         }

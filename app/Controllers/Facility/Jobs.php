@@ -224,17 +224,27 @@ class Jobs extends BaseController
             ]);
         }
 
+        $start_date = $this->request->getPost('date');
+        $end_date = $start_date;
         $shiftTime = explode(" - ", $this->request->getPost('time'));
+        $startTime = date("H:i:s", strtotime($shiftTime[0]));
+        $endTime = date("H:i:s", strtotime($shiftTime[1]));
+        
+        if (strtotime($endTime) < strtotime($startTime)) {
+            $end_date = date('Y-m-d', strtotime($start_date . ' + 1 day'));
+        }
+
         $item = [
             'client_id' => $facilityId,
             'shift_type' => $this->request->getPost('shift_type'),
             'rate' => $this->request->getPost('rate'),
             'slots' => $this->request->getPost('slots'),
             'unit_id' => $this->request->getPost('unit_id'),
-            'start_date' => $this->request->getPost('date'),
+            'start_date' => $start_date,
+            'end_date' => $end_date,
             'status' => 1,
-            'shift_start_time' => date("H:i:s", strtotime($shiftTime[0])),
-            'shift_end_time' => date("H:i:s", strtotime($shiftTime[1]))
+            'shift_start_time' => $startTime,
+            'shift_end_time' => $endTime
         ];
 
         if ($this->shiftsModel->save($item)) {

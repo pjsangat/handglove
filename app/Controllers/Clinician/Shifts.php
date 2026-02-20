@@ -10,6 +10,7 @@ use App\Models\ShiftRequestsModel;
 use App\Models\ShiftCliniciansModel;
 use App\Models\FacilityUnitsModel;
 use App\Models\ShiftsTimekeepingModel;
+use App\Models\ClientRatingsModel;
 use App\Models\UserModel;
 use \Datetime;
 use CodeIgniter\Files\File;
@@ -30,6 +31,14 @@ class Shifts extends BaseController
                                         ->join('tbl_clinician_types', 'tbl_clinician_types.id = tbl_clinicians.type', 'INNER')
                                         ->where('tbl_clinicians.email', session()->get('email'))
                                         ->first();
+
+            $objShiftClinician = new ShiftCliniciansModel;
+            $data['profileData']['total_shifts'] = $objShiftClinician->where('clinician_id', $data['profileData']['id'])->where('status', 10)->countAllResults();
+
+            $objTimekeeping = new ShiftsTimekeepingModel;
+            $stats = $objTimekeeping->getStats($data['profileData']['id']);
+            $data['profileData']['attendance_percentage'] = $stats['attendance'];
+            $data['profileData']['lateness_percentage'] = $stats['lateness'];
 
             // PAGE HEAD PROCESSING
             return view('components/header', array(
@@ -256,6 +265,58 @@ class Shifts extends BaseController
             }
         }
 
+
+        echo json_encode($data);
+        exit();
+    }
+
+    public function submitFeedback()
+    {
+        $data = [
+            'success' => 0,
+            'message' => 'Invalid requests.'
+        ];
+
+        $session = session();
+        if ($session->get('isLoggedIn') == 1) {
+            if ($this->request->isAJAX()) {
+                $clinModel = new CliniciansModel();
+                $profileData = $clinModel
+                    ->where('email', $session->get('email'))
+                    ->first();
+
+                if (!empty($profileData)) {
+                    $shiftID = $this->request->getPost('shiftID');
+                    $objShifts = new ShiftsModel();
+                    $shift = $objShifts->find($shiftID);
+
+                    if ($shift) {
+                        $objRatings = new ClientRatingsModel();
+                        $cleanliness = $this->request->getPost('cleanliness');
+                        $workEnvironment = $this->request->getPost('work_environment');
+                        $toolsNeeded = $this->request->getPost('tools_needed');
+                        $average = ($cleanliness + $workEnvironment + $toolsNeeded) / 3;
+
+                        $item = [
+                            'shift_id' => $shiftID,
+                            'clinician_id' => $profileData['id'],
+                            'client_id' => $shift['client_id'],
+                            'cleanliness' => $cleanliness,
+                            'work_environment' => $workEnvironment,
+                            'tools_needed' => $toolsNeeded,
+                            'average' => $average,
+                            'comment' => $this->request->getPost('comment'),
+                            'datetime_added' => date("Y-m-d H:i:s")
+                        ];
+                        
+                        if ($objRatings->save($item)) {
+                            $data['success'] = 1;
+                            $data['message'] = 'Thank you for your feedback!';
+                        }
+                    }
+                }
+            }
+        }
 
         echo json_encode($data);
         exit();

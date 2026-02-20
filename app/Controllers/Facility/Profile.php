@@ -7,6 +7,7 @@ use App\Models\CredentialTypesModel;
 use App\Models\ClinicianCredentialsModel;
 use App\Models\UserModel;
 use App\Models\FacilityModel;
+use App\Models\FacilityOnboardingSettingsModel;
 use \Datetime;
 use CodeIgniter\Files\File;
 
@@ -17,6 +18,7 @@ class Profile extends BaseController
     protected $clinicianCredentialsModel;
     protected $userModel;
     protected $facilityModel;
+    protected $facilityOnboardingSettingsModel;
     protected $session;
 
     public function __construct()
@@ -26,6 +28,7 @@ class Profile extends BaseController
         $this->clinicianCredentialsModel = new ClinicianCredentialsModel();
         $this->userModel = new UserModel();
         $this->facilityModel = new FacilityModel();
+        $this->facilityOnboardingSettingsModel = new FacilityOnboardingSettingsModel();
         $this->session = session();
     }
 
@@ -44,6 +47,7 @@ class Profile extends BaseController
         $data = [
             'session' => $this->session,
             'facility' => $facility,
+            'onboardingSettings' => $this->facilityOnboardingSettingsModel->where('client_id', $this->session->get('facility_id'))->first(),
             'page' => 'profile'
         ];
 

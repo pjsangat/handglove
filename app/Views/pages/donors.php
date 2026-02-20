@@ -110,7 +110,7 @@
                 <!-- DON Of the Week -->
                 <div class="col-md-4 mb-4">
                     <div class="d-flex align-items-center mb-3">
-                        <h5 class="text-blue mb-0">DON Of the Week</h5>
+                        <h5 class="text-blue mb-0">Scheduler Of the Week</h5>
                         <div class="dash ml-2 flex-grow-1"></div>
                     </div>
                     <div class="clinician-cards">

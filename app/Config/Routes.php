@@ -49,6 +49,7 @@ $routes->group("profile", ["namespace" => "App\Controllers\Clinician", "filter" 
     $routes->post('shifts/list', 'Shifts::list');
     $routes->post('shifts/clockIn', 'Shifts::clockIn');
     $routes->post('shifts/clockOut', 'Shifts::clockOut');
+    $routes->post('shifts/submitFeedback', 'Shifts::submitFeedback');
 });
 
 
@@ -59,7 +60,8 @@ $routes->group("facility", ["namespace" => "App\Controllers"], function ($routes
     $routes->get('profile/(:num)/onboarding/(:num)/pdf', 'Facility::onboarding_pdf/$1/$2');
     $routes->get('profile/(:num)/onboarding/(:num)', 'Facility::onboarding/$1/$2');
     $routes->post('vote', 'Facility::vote');
-
+    $routes->post('get_reviews', 'Facility::get_reviews');
+    $routes->post('upload_schedule', 'Facility::upload_schedule');
     $routes->group("manage", ["namespace" => "App\Controllers\Facility", "filter" => "userAuth"], function ($routes) {
         $routes->get('', 'Dashboard::index');
         $routes->get('profile', 'Profile::index');
@@ -87,6 +89,7 @@ $routes->group("facility", ["namespace" => "App\Controllers"], function ($routes
             $routes->post('get', 'Votes::get');
             $routes->post('add', 'Votes::insert');
             $routes->post('update', 'Votes::update');
+            $routes->post('delete', 'Votes::delete');
         });
 
         $routes->group("jobs", function ($routes) {
@@ -128,6 +131,7 @@ $routes->group("facility", ["namespace" => "App\Controllers"], function ($routes
         $routes->group("shifts", function ($routes) {
             $routes->get('', 'Shifts::index');
             $routes->post('list', 'Shifts::list');
+            $routes->post('transfer', 'Shifts::transfer');
         });
     });
 });
@@ -170,7 +174,6 @@ $routes->group("admin", ["namespace" => "App\Controllers\Admin"], function ($rou
         $routes->post('upload', 'BoardOfDirectors::upload');
         $routes->post('list', 'BoardOfDirectors::list');
     });
-
 
 
     $routes->group('donors', ['filter' => 'adminAuth'], function ($routes) {

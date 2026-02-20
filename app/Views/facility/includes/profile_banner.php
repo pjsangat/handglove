@@ -19,7 +19,7 @@
                         <div class="no-of-shifts-cont stats">
                             <div class="person-card">
                                 <i class="fa fa-user"></i>
-                                <div class="card-counter">400+</div>
+                                <div class="card-counter"><?php echo !empty($onboardingSettings['total_beds']) ? $onboardingSettings['total_beds'] : '0'; ?></div>
                                 <p>Total Beds</p>
                             </div>
 
@@ -27,14 +27,14 @@
                         <div class="attendance-cont stats">
                             <div class="circle-card">
                                 <div class="circle" data-percent="85" style="background: conic-gradient(#3bb4e5 <?php echo 85*3.6.'deg'; ?>, #eee <?php echo 85*3.6.'deg'; ?>);"></div>
-                                <div class="card-counter">1:20</div>
+                                <div class="card-counter"><?php echo !empty($onboardingSettings['average_census']) ? $onboardingSettings['average_census'] : '0:0'; ?></div>
                                 <p>Census</p>
                             </div>
                         </div>
                         <div class="tardiness-cont stats">
                             <div class="circle-card">
-                                <div class="circle" data-percent="6" style="background: conic-gradient(#3bb4e5 <?php echo 6*3.6.'deg'; ?>, #eee <?php echo 6*3.6.'deg'; ?>);"></div>
-                                <div class="card-counter">6%</div>
+                                <div class="circle" data-percent="<?php echo $workFriendly; ?>" style="background: conic-gradient(#3bb4e5 <?php echo $workFriendly*3.6.'deg'; ?>, #eee <?php echo $workFriendly*3.6.'deg'; ?>);"></div>
+                                <div class="card-counter"><?php echo $workFriendly; ?>%</div>
                                 <p>Work Friendly</p>
                             </div>
                         </div>

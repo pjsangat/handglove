@@ -3,20 +3,20 @@
 namespace App\Models;
 use CodeIgniter\Model;
  
-class FacilityVotesModel extends Model
+class ShiftUploadsModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'tbl_client_voting';
+    protected $table            = 'tbl_shift_uploads';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $insertID         = 0;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['client_id', 'voting_start_date', 'voting_end_date', 'description', 'voting_type', 'status'];
+    protected $allowedFields    = ['client_id', 'shift_date', 'filename', 'file_path', 'uploaded_by', 'created_at'];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -38,12 +38,5 @@ class FacilityVotesModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-    public function hasActiveVoting($clientId)
-    {
-        $today = date('Y-m-d');
-        return $this->where('client_id', $clientId)
-                    ->where('voting_start_date <=', $today)
-                    ->where('voting_end_date >=', $today)
-                    ->first() ? true : false;
-    }
+    
 }

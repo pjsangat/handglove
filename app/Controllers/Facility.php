@@ -12,7 +12,11 @@ use App\Models\FacilityVotesModel;
 use App\Models\FacilityVoteDetailsModel;
 use App\Models\FacilityUnitsModel;
 use App\Models\FacilityVotingModel;
+use App\Models\ClientRatingsModel;
+use App\Models\ShiftsModel;
 use App\Models\FacilityOnboardingModel;
+use App\Models\FacilityOnboardingSettingsModel;
+use App\Models\ShiftUploadsModel;
 use \Datetime;
 use CodeIgniter\Files\File;
 
@@ -31,7 +35,11 @@ class Facility extends BaseController
                 if(!$data['facility']){
                     return redirect()->to('/profile');
                 }
+            }else{
+                return redirect()->to('/profile');
             }
+            $onboardingSettingsModel = new FacilityOnboardingSettingsModel;
+            $data['onboardingSettings'] = $onboardingSettingsModel->where('client_id', $session->get('facility_id'))->first();
 
             $objUnits = new FacilityUnitsModel;
             $units = $objUnits->where('client_id', $session->get('facility_id'))->findAll();
@@ -61,7 +69,70 @@ class Facility extends BaseController
                 $data['votingArr'] = $votingArr;
             }
 
+            $objShifts = new ShiftsModel();
+            $hasActiveShift = $objShifts->hasActiveShift($session->get('facility_id'));
+            $hasActiveShiftThisWeek = $objShifts->hasActiveShiftThisWeek($session->get('facility_id'));
+
+            $hasActiveVoting = $objVotes->hasActiveVoting($session->get('facility_id'));
+            $workFriendlyVal = 0;
+            //Check if facility has active shift for this week, add 30 points if yes
+            if($hasActiveVoting){
+                $workFriendlyVal += 20;
+            }
+            if($hasActiveShift){
+                $workFriendlyVal += 20;
+            }
+            if($hasActiveShiftThisWeek){
+                $workFriendlyVal += 30;
+            }
+
+
+            $data['workFriendly'] = $workFriendlyVal;
+
             $data['units'] = $units;
+
+            $view = 'private_profile';
+            $scripts = array(
+                'https://code.jquery.com/jquery-3.5.1.min.js' => array(
+                    'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
+                    'crossorigin' => 'anonymous'
+                ),
+                'https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.2/datatables.min.js',
+                ASSETS_URL . 'js/plugins/popper.min.js',
+                ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
+                ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
+                ASSETS_URL . 'js/components/global.min.js',
+                ASSETS_URL . 'js/plugins/owl.carousel.min.js',
+                ASSETS_URL . 'js/components/navigation_bar.min.js',
+                ASSETS_URL . 'js/plugins/bootstrap-datepicker.js',
+                ASSETS_URL . 'js/pages/facility_profile.min.js',
+                ASSETS_URL . 'js/plugins/toastr.min.js',
+            );
+
+            $styles = array(
+                'plugins/font_awesome',
+                COMPILED_ASSETS_PATH . 'css/components/bootstrap',
+                COMPILED_ASSETS_PATH . 'css/components/fontawesome',
+                COMPILED_ASSETS_PATH . 'css/components/owl',
+                COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
+                COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
+                COMPILED_ASSETS_PATH . 'css/components/toastr',
+                COMPILED_ASSETS_PATH . 'css/components/global',
+                COMPILED_ASSETS_PATH . 'css/components/animations',
+                COMPILED_ASSETS_PATH . 'css/components/buttons',
+                COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
+                COMPILED_ASSETS_PATH . 'css/components/footer',
+                COMPILED_ASSETS_PATH . 'css/pages/facility_profile'
+            );
+
+            if(session()->get('type') == 5){
+                $view = 'scheduler_profile';
+                $scripts[] = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js';
+                $scripts[] = ASSETS_URL . 'js/pages/facility_scheduler_profile.min.js';
+                $styles[] = COMPILED_ASSETS_PATH . 'css/pages/facility_scheduler_profile';
+            }else{
+                $scripts[] = ASSETS_URL . 'js/pages/facility_shifts.min.js';
+            }
             // PAGE HEAD PROCESSING
             return view('components/header', array(
                 'title' => 'Handglove',
@@ -73,39 +144,12 @@ class Facility extends BaseController
                     'description' => '',
                     'image' => IMG_URL . ''
                 ),
-                'styles' => array(
-                    'plugins/font_awesome',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap',
-                    COMPILED_ASSETS_PATH . 'css/components/fontawesome',
-                    COMPILED_ASSETS_PATH . 'css/components/owl',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
-                    COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
-                    COMPILED_ASSETS_PATH . 'css/components/global',
-                    COMPILED_ASSETS_PATH . 'css/components/animations',
-                    COMPILED_ASSETS_PATH . 'css/components/buttons',
-                    COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
-                    COMPILED_ASSETS_PATH . 'css/components/footer',
-                    COMPILED_ASSETS_PATH . 'css/pages/facility_profile'
-                ),
+                'styles' => $styles,
                 'session' => $data['session']
             ))
-            .view('facility/private_profile', $data)
+            .view('facility/'.$view, $data)
             .view('components/scripts_render', array(
-                'scripts' => array(
-                    'https://code.jquery.com/jquery-3.5.1.min.js' => array(
-                        'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
-                        'crossorigin' => 'anonymous'
-                    ),
-                    ASSETS_URL . 'js/plugins/popper.min.js',
-                    ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
-                    ASSETS_URL . 'js/plugins/bootstrap-select.min.js',
-                    ASSETS_URL . 'js/components/global.min.js',
-                    ASSETS_URL . 'js/plugins/owl.carousel.min.js',
-                    ASSETS_URL . 'js/components/navigation_bar.min.js',
-                    ASSETS_URL . 'js/plugins/bootstrap-datepicker.js',
-                    ASSETS_URL . 'js/pages/facility_profile.min.js',
-                    ASSETS_URL . 'js/pages/facility_shifts.min.js',
-                )
+                'scripts' => $scripts,
             ))
             .view('components/footer');
         }
@@ -125,6 +169,16 @@ class Facility extends BaseController
                     return redirect()->to('/profile');
                 }
             }
+
+            $onboardingSettingsModel = new FacilityOnboardingSettingsModel;
+            $data['onboardingSettings'] = $onboardingSettingsModel->where('client_id', $client_id)->first();
+            
+            if(!empty($data['onboardingSettings']['accepted_per_diem_network'])){
+                $data['onboardingSettings']['accepted_per_diem_network'] = json_decode($data['onboardingSettings']['accepted_per_diem_network'], true);
+            } else {
+                $data['onboardingSettings']['accepted_per_diem_network'] = [];
+            }
+
             $clinModel = new CliniciansModel;
             $data['profileData'] = $clinModel->where('email', session()->get('email'))->first();
 
@@ -163,6 +217,54 @@ class Facility extends BaseController
                 }
                 $data['votingArr'] = $votingArr;
             }
+
+            $objShifts = new ShiftsModel();
+            $hasActiveShift = $objShifts->hasActiveShift($client_id);
+            $hasActiveShiftThisWeek = $objShifts->hasActiveShiftThisWeek($client_id);
+
+            $hasActiveVoting = $objVotes->hasActiveVoting($client_id);
+            $workFriendlyVal = 0;
+            
+            if($hasActiveVoting){
+                $workFriendlyVal += 20;
+            }
+            if($hasActiveShift){
+                $workFriendlyVal += 20;
+            }
+            if($hasActiveShiftThisWeek){
+                $workFriendlyVal += 30;
+            }
+
+
+            // FETCH REVIEWS
+            $objRatings = new ClientRatingsModel();
+
+            //add query to get total rows only
+            $totalReviews = $objRatings->select('COUNT(*) as total')
+                ->where('tbl_client_ratings.client_id', $client_id)
+                ->first();
+            $totalCount = $totalReviews['total'];
+            $aggregatesData = $objRatings->select('AVG(cleanliness) as cleanliness, AVG(work_environment) as work_environment, AVG(tools_needed) as tools_needed, AVG(average) as average')
+                ->where('client_id', $client_id)
+                ->first();
+
+            $aggregates = [
+                'cleanliness' => number_format($aggregatesData['cleanliness'] ?? 0, 2),
+                'work_environment' => number_format($aggregatesData['work_environment'] ?? 0, 2),
+                'tools_needed' => number_format($aggregatesData['tools_needed'] ?? 0, 2),
+                'average' => number_format($aggregatesData['average'] ?? 0, 2),
+                'count' => $totalCount,
+                'average_percentage' => ($aggregatesData['average'] ?? 0) / 5 * 100
+            ];
+            $data['aggregates'] = $aggregates;
+            
+            if ($aggregates['average_percentage'] > 0) {
+                // Get the percentage value of average_percentage relative to 30 points
+                $ratingBonus = ($aggregates['average_percentage'] / 100) * 30;
+                $workFriendlyVal += ceil($ratingBonus);
+            }
+            $data['workFriendly'] = $workFriendlyVal;
+            
             // PAGE HEAD PROCESSING
             return view('components/header', array(
                 'title' => 'Handglove',
@@ -210,6 +312,62 @@ class Facility extends BaseController
         }
     }
 
+    public function get_reviews()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Invalid request.']);
+        }
+
+        $clientId = $this->request->getPost('client_id');
+        $page = $this->request->getPost('page') ?: 1;
+        $limit = 3;
+        $offset = ($page - 1) * $limit;
+
+        $objRatings = new ClientRatingsModel();
+        $reviews = $objRatings->select('tbl_client_ratings.*, tbl_clinicians.name as clinician_name, tbl_clinicians.profile_pic_url')
+            ->join('tbl_clinicians', 'tbl_clinicians.id = tbl_client_ratings.clinician_id', 'inner')
+            ->where('tbl_client_ratings.client_id', $clientId)
+            ->orderBy('datetime_added', 'DESC')
+            ->limit($limit, $offset)
+            ->findAll();
+
+        $html = '';
+        if (!empty($reviews)) {
+            foreach ($reviews as $review) {
+                $profilePic = !empty($review['profile_pic_url']) ? $review['profile_pic_url'] : base_url('assets/img/blank-img.png');
+                $dateFormatted = date("F d, Y", strtotime($review['datetime_added']));
+                $stars = '';
+                for ($i = 1; $i <= 5; $i++) {
+                    $stars .= '<i class="fa' . ($i <= round($review['average']) ? 's' : 'r') . ' fa-star"></i>';
+                }
+
+                $comment = htmlspecialchars($review['comment']);
+                $name = htmlspecialchars($review['clinician_name']);
+
+                $html .= "
+                    <div class='review-item mb-4 pb-4 border-bottom'>
+                        <div class='d-flex align-items-start'>
+                            <img src='{$profilePic}' class='rounded-circle mr-3' style='width: 60px; height: 60px; object-fit: cover;'>
+                            <div>
+                                <div class='rating-stars text-warning mb-1'>
+                                    {$stars}
+                                </div>
+                                <h6 class='mb-1'>{$name}: <span class='font-weight-normal'>{$comment}</span></h6>
+                                <p class='mb-0 text-muted small'>{$dateFormatted} • Verified clinician</p>
+                            </div>
+                        </div>
+                    </div>";
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => 1,
+            'html' => $html,
+            'has_more' => count($reviews) == $limit,
+            'total_pages' => ceil($objRatings->where('client_id', $clientId)->countAllResults() / $limit),
+            'current_page' => $page
+        ]);
+    }
 
     public function vote(){
         $data = [
@@ -248,296 +406,6 @@ class Facility extends BaseController
         }
         echo json_encode($data);
         exit();
-    }
-    public function update(){
-
-        $session = session();
-        if( is_null($session->get('isLoggedIn')) || $session->get('isLoggedIn') != 1){
-            return redirect()->to('/');
-        }
-
-        $data['success'] = 0;
-        $data['message'] = 'Invalid request';
-        
-        if ($this->request->isAJAX()) {
-            $validationRule = [
-                'id_file' => [
-                    'label' => 'ID',
-                    'rules' => [
-                        'max_size[id_file, 16000]',
-                    ],
-                ],
-            ];
-            if (! $this->validateData([], $validationRule)) {
-                $data['message'] = implode("<br>",  $this->validator->getErrors());
-            }else{
-                $file = $this->request->getFile('id_file');
-
-                $first_name = $this->request->getPost('first_name');
-                $last_name = $this->request->getPost('last_name');
-                $mobile_number = $this->request->getPost('contact_number');
-                $date_of_birth = $this->request->getPost('date_of_birth');
-    
-                $regModel = new RegistrationModel;
-                $reg = $regModel->where('email_address', $session->get('email'))->first();
-                $item = [
-                    'first_name' => $first_name,
-                    'last_name' => $last_name,
-                    'mobile_number' => $mobile_number,
-                    'date_of_birth' => date("Y-m-d", strtotime($date_of_birth)),
-                ];
-                $nsave = $regModel->set($item)->where('email_address', $session->get('email'))->update();
-                if($nsave && $file->isValid()){
-                    $orig_name = $file->getName();
-
-                    $client = new \Aws\S3\S3Client([
-                        'region' => 'ap-southeast-1',
-                        'version' => 'latest',
-                        'credentials' => [
-                            'key' => 'AKIATCKASCV6SM4BXYHC',
-                            'secret' => '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',
-                        ],
-                    ]);
-                    $bucket = 'tpbucketdv01';
-                    $key = 'vabgc/uploads/'.$reg['id'].'/'.$orig_name; // Assuming 'file' is the name of the input field
-                    
-                    $result = $client->putObject([
-                        'Bucket' => $bucket,
-                        'Key' => $key,
-                        'SourceFile' => $file->getRealPath(),
-                        'ContentType' => $file->getMimeType()
-                    ]);                    
-                    $regModel = new RegistrationModel;
-                    $regModel->update($reg['id'], ['id_image' => $result['ObjectURL']]);
-
-                    // $path = FCPATH.'assets/img/uploads/'.$reg['id'];
-                    // if(!is_dir(FCPATH.'assets/img/uploads/')){
-                    //     mkdir(FCPATH.'assets/img/uploads/');
-                    // }
-                    // if(!is_dir($path)){
-                    //     mkdir($path);
-                    // }
-                    // if($file->move($path, $orig_name)){
-                    //     $regModel = new RegistrationModel;
-                    //     $regModel->update($reg['id'], ['id_image' => BASE_URL . 'assets/img/uploads/' . $reg['id'] . '/' . $orig_name]);
-                    // }
-                }
-
-                $userModel = new UserModel;
-                $item = [
-                    'first_name' => $first_name,
-                    'last_name' => $last_name,
-                    'contact_number' => $mobile_number,
-                    'date_of_birth' => date("Y-m-d", strtotime($date_of_birth)),
-                ];
-                $save = $userModel->set($item)->where('id', $session->get('id'))->update();
-
-
-                // $nsave = $regModel->save($item);
-                // $reg_id = $regModel->getInsertID();
-    
-                // $save = $userModel->save($item);
-                // $user_id = $userModel->getInsertID();
-
-                if($save){
-                    $session->set('first_name', $first_name);
-                    $session->set('last_name', $last_name);
-                    $session->set('date_of_birth',  date("Y-m-d", strtotime($date_of_birth)));
-                    $session->set('mobile_number', $mobile_number);
-                    session()->setFlashData('success', 'Profile successfully updated.');
-
-                    $data['message'] = 'Profile successfully updated.';
-                    $data['success'] = 1;
-                }
-            }
-
-        }
-
-        echo json_encode($data);
-        exit();
-
-
-    }
-
-    public function change_password(){
-
-        $session = session();
-        $data['session'] = $session;
-        
-        if( is_null($session->get('isLoggedIn')) || $session->get('isLoggedIn') != 1){
-            return redirect()->to('/');
-        }
-
-        // PAGE HEAD PROCESSING
-        return view('components/header', array(
-            'title' => 'Villamor Air Base Golf Course',
-            'description' => '',
-            'url' => BASE_URL,
-            'keywords' => '',
-            'meta' => array(
-                'title' => 'Villamor Air Base Golf Course',
-                'description' => '',
-                'image' => IMG_URL . ''
-            ),
-            'styles' => array(
-                'plugins/font_awesome',
-                COMPILED_ASSETS_PATH . 'css/components/bootstrap',
-                COMPILED_ASSETS_PATH . 'css/components/fontawesome',
-                COMPILED_ASSETS_PATH . 'css/components/owl',
-                COMPILED_ASSETS_PATH . 'css/components/bootstrap-main',
-                COMPILED_ASSETS_PATH . 'css/components/bootstrap-select',
-                COMPILED_ASSETS_PATH . 'css/components/bootstrap-datepicker',
-                COMPILED_ASSETS_PATH . 'css/components/global',
-                COMPILED_ASSETS_PATH . 'css/components/animations',
-                COMPILED_ASSETS_PATH . 'css/components/buttons',
-                COMPILED_ASSETS_PATH . 'css/components/navigation_bar',
-                COMPILED_ASSETS_PATH . 'css/components/footer',
-                COMPILED_ASSETS_PATH . 'css/pages/profile'
-            ),
-            'session' => $data['session']
-        ))
-        .view('profile/change_password', $data)
-        .view('components/scripts_render', array(
-            'scripts' => array(
-                'https://code.jquery.com/jquery-3.5.1.min.js' => array(
-                    'integrity' => 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=',
-                    'crossorigin' => 'anonymous'
-                ),
-                ASSETS_URL . 'js/plugins/popper.min.js',
-                ASSETS_URL . 'js/plugins/bootstrap-4.5.2/bootstrap.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js',
-                ASSETS_URL . 'js/components/global.min.js',
-                ASSETS_URL . 'js/plugins/jquery.validate.min.js',
-                ASSETS_URL . 'js/plugins/owl.carousel.min.js',
-                ASSETS_URL . 'js/components/navigation_bar.min.js',
-                ASSETS_URL . 'js/pages/profile.min.js',
-            )
-        ));
-
-    }
-    public function update_password(){
-
-        $session = session();
-        $data['success'] = 0;
-        $data['message'] = 'Invalid request';
-
-        if( is_null($session->get('isLoggedIn')) || $session->get('isLoggedIn') != 1){
-            return redirect()->to('/');
-        }
-
-        if ($this->request->isAJAX()) {
-            $userModel = new UserModel;
-            $user = $userModel->find($session->get('id'));
-            $verify_password = password_verify($this->request->getPost('current'), $user['password']);
-
-            if($verify_password){
-                $userModel = new UserModel;
-                $password = $this->request->getPost('password');
-                $save = $userModel->set(['password' => password_hash($password, PASSWORD_DEFAULT)])->where('id', $session->get('id'))->update();
-                if($save){
-                    $data['success'] = 1;
-                    session()->setFlashData('success', 'Password successfully updated.');
-                    $data['message'] = 'success';
-                }
-            }else{
-                $data['message'] = 'Current password is invalid.';
-            }
-        }
-
-        echo json_encode($data);
-        exit();
-    }
-
-    function upload_credentials(){
-        $data = [
-            'success' => 0, 
-            'message' => 'Invalid requests.'
-        ];
-
-        $session = session();
-        if( $session->get('isLoggedIn') == 1){
-            $clinModel = new CliniciansModel;
-            $profileData = $clinModel->where('email', session()->get('email'))->first();
-
-            $clinician_id = $profileData['id'];
-            
-            if($this->request->isAJAX()){
-
-                // $path = FCPATH. 'leads/uploads/clinicians/'.$clinician_id;
-
-                $validationRule = [
-                    'file_' . $_POST['credential_id'] => [
-                        'label' => 'Credential File',
-                        'rules' => [
-                            'uploaded[file_' . $_POST['credential_id'].']',
-                            'mime_in[file_' . $_POST['credential_id'].',image/jpg,image/jpeg,image/png,application/pdf]',
-                            'max_size[file_' . $_POST['credential_id'].', '.(1024 * 5).']',
-                        ],
-                    ],
-                ];
-
-                
-                // if (!is_dir($path)) {
-                //     mkdir($path, 0777);
-                // }
-
-                if (! $this->validateData([], $validationRule)) {
-                    $data['message'] = implode(",", $this->validator->getErrors());
-                }else{
-                    
-                    $orig_filename = $_FILES['file_' . $_POST['credential_id']]['name'];
-                    // $file_arr = explode(".", $_FILES['file_' . $_POST['credential_id']]['name']);
-
-                    // $filename = $file_arr[0] . '_' . $_POST['credential_id'] . '_' . date("YmdHis") .'.' . $file_arr[1];
-                    // $config['file_name'] = $filename;
-
-                    $img = $this->request->getFile('file_' . $_POST['credential_id']);
-                    if (! $img->hasMoved()) {
-                        
-                        $credsModel = new ClinicianCredentialsModel;
-                        $creds = $credsModel->where('clinician_id', $clinician_id)->where('credential_id', $_POST['credential_id'])->findAll();
-
-                        if(!empty($creds)){
-                            foreach($creds as $item){
-                                unlink($item['file_path']);
-                                $credsModel->where('id', $item['id'])->delete();
-                            }
-                        }
-                        $filepath = WRITEPATH . 'uploads/' . $img->store();
-
-                        $item = [
-                            'credential_id' => $_POST['credential_id'],
-                            'clinician_id' => $clinician_id,
-                            'filename' => $orig_filename,
-                            'file_path' => $filepath
-                        ];
-                        $credsModel->save($item);
-
-                        $data['success'] = 1;
-                        $data['data'] = [
-                            'file' => '<a href="'. base_url('profile/showCredential/'.$_POST['credential_id']) .'" target="_blank">'.$orig_filename.'</a>',
-                            'credential_id' => $_POST['credential_id']
-                        ];
-                    }
-
-
-                }
-
-            }
-        }
-
-        echo json_encode($data);
-        exit();
-    }
-
-    function test_email(){
-        $email = service('email');
-        $email->setFrom('admin@handglove.net', 'Handglove');
-        $email->setTo('pjsangat@gmail.com');
-        $email->setSubject('Email Test');
-        $email->setMessage('Testing the email class.');
-        $e = $email->send();
-        pe($email->printDebugger());
     }
 
 
@@ -647,4 +515,50 @@ class Facility extends BaseController
         }
     }
 
+    public function upload_schedule()
+    {
+        $session = session();
+        if (!$session->get('isLoggedIn') || $session->get('facility_id') == 0) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Unauthorized']);
+        }
+
+        $validationRule = [
+            'schedule_file' => [
+                'label' => 'PDF File',
+                'rules' => [
+                    'uploaded[schedule_file]',
+                    'mime_in[schedule_file,application/pdf]',
+                    'max_size[schedule_file,10240]', // 10MB
+                ],
+            ],
+        ];
+
+        if (!$this->validate($validationRule)) {
+            return $this->response->setJSON(['success' => 0, 'message' => implode('<br>', $this->validator->getErrors())]);
+        }
+
+        $file = $this->request->getFile('schedule_file');
+        if ($file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            if (!is_dir(FCPATH . 'uploads/schedules')) {
+                mkdir(FCPATH . 'uploads/schedules', 0777, true);
+            }
+            $file->move(FCPATH . 'uploads/schedules', $newName);
+
+            $model = new \App\Models\ShiftUploadsModel();
+            $data = [
+                'client_id' => $session->get('facility_id'),
+                'shift_date' => $this->request->getPost('shift_date'),
+                'filename' => $file->getClientName(),
+                'file_path' => 'uploads/schedules/' . $newName,
+                'uploaded_by' => $session->get('id'),
+            ];
+
+            if ($model->insert($data)) {
+                return $this->response->setJSON(['success' => 1, 'message' => 'Schedule uploaded successfully']);
+            }
+        }
+
+        return $this->response->setJSON(['success' => 0, 'message' => 'Failed to upload schedule']);
+    }
 }

@@ -62,7 +62,9 @@
                                     <?php } ?>
                                     <?php if( session()->get('facility_id') != 0){ ?>
                                         <li><a href="<?php echo base_url('facility'); ?>">Facility Profile</a></li>
-                                        <li><a href="<?php echo base_url('facility/manage'); ?>">Manage Facility</a></li>
+                                        <?php if(session()->get('type') != 5){ ?>
+                                            <li><a href="<?php echo base_url('facility/manage'); ?>">Manage Facility</a></li>
+                                        <?php } ?>
                                     <?php } ?>
                                     <li><a href="<?php echo base_url('login/logout'); ?>">Logout</a></li> 
                                 </ul> 

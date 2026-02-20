@@ -9,7 +9,7 @@ class BoardOfDirectors extends BaseController
     public function index()
     {
         $model = new BoardOfDirectorsModel();
-        $board_members = $model->orderBy('id', 'ASC')->findAll();
+        $board_members = $model->orderBy('id', 'DESC')->findAll();
 
         return view('components/header', array(
             'title' => 'Board of Directors | Handglove',

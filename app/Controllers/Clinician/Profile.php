@@ -11,6 +11,7 @@ use App\Models\ClinicianCredentialsModel;
 use App\Models\ShiftRequestsModel;
 use App\Models\ShiftsModel;
 use App\Models\ShiftCliniciansModel;
+use App\Models\ShiftsTimekeepingModel;
 use App\Libraries\Ciqrcode;
 use App\Models\UserModel;
 use \Datetime;
@@ -40,6 +41,15 @@ class Profile extends BaseController
             foreach($credentials as $credential){
                 $data['profileData']['credentials'][$credential['credential_id']] = $credential;
             }
+
+            $objShiftClinician = new ShiftCliniciansModel;
+            $data['profileData']['total_shifts'] = $objShiftClinician->where('clinician_id', $data['profileData']['id'])->where('status', 10)->countAllResults();
+
+            $objTimekeeping = new ShiftsTimekeepingModel;
+            $stats = $objTimekeeping->getStats($data['profileData']['id']);
+            $data['profileData']['attendance_percentage'] = $stats['attendance'];
+            $data['profileData']['lateness_percentage'] = $stats['lateness'];
+
             $objClinReferrals = new ClinicianReferralsModel;
             $referral_arr = $objClinReferrals->where('clinician_id', $data['profileData']['id'])
                                     ->findAll();
@@ -124,6 +134,15 @@ class Profile extends BaseController
                 foreach($credentials as $credential){
                     $data['profileData']['credentials'][$credential['credential_id']] = $credential;
                 }
+
+                $objShiftClinician = new ShiftCliniciansModel;
+                $data['profileData']['total_shifts'] = $objShiftClinician->where('clinician_id', $data['profileData']['id'])->where('status', 10)->countAllResults();
+
+                $objTimekeeping = new ShiftsTimekeepingModel;
+                $stats = $objTimekeeping->getStats($data['profileData']['id']);
+                $data['profileData']['attendance_percentage'] = $stats['attendance'];
+                $data['profileData']['lateness_percentage'] = $stats['lateness'];
+
                 $objClinReferrals = new ClinicianReferralsModel;
                 $referral_arr = $objClinReferrals->where('clinician_id', $data['profileData']['id'])
                                         ->findAll();

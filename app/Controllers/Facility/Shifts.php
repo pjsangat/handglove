@@ -9,6 +9,7 @@ use App\Models\ShiftTypesModel;
 use App\Models\ShiftRequestsModel;
 use App\Models\ShiftCliniciansModel;
 use App\Models\FacilityUnitsModel;
+use App\Models\ShiftsTimekeepingModel;
 use App\Models\UserModel;
 use \Datetime;
 use CodeIgniter\Files\File;
@@ -21,6 +22,7 @@ class Shifts extends BaseController
     protected $shiftRequestsModel;
     protected $shiftCliniciansModel;
     protected $facilityUnitsModel;
+    protected $shiftsTimekeepingModel;
     protected $userModel;
     protected $session;
 
@@ -32,6 +34,7 @@ class Shifts extends BaseController
         $this->shiftRequestsModel = new ShiftRequestsModel();
         $this->shiftCliniciansModel = new ShiftCliniciansModel();
         $this->facilityUnitsModel = new FacilityUnitsModel();
+        $this->shiftsTimekeepingModel = new ShiftsTimekeepingModel();
         $this->userModel = new UserModel();
         $this->session = session();
     }
@@ -134,12 +137,18 @@ class Shifts extends BaseController
             ->where('tbl_shifts.client_id', $facilityId)
             ->where('tbl_shifts.unit_id', $unitId)
             ->where('tbl_shifts.start_date', $date)
-            ->where("'" . date("H:i:s") . "' BETWEEN tbl_shifts.shift_start_time AND tbl_shifts.shift_end_time")
+            ->where("CONCAT(IFNULL(tbl_shifts.end_date, tbl_shifts.start_date), ' ', tbl_shifts.shift_end_time) > '" . date("Y-m-d H:i:s") . "'")
             ->findAll();
 
         foreach ($shifts as &$shift) {
             $shift['shift_end_time_formatted'] = date("h:i A", strtotime($shift['shift_end_time']));
             $shift['shift_start_time_formatted'] = date("h:i A", strtotime($shift['shift_start_time']));
+
+            $shift['action'] = sprintf(
+                '<div class="mt-3"><a href="javascript:;" data-id="%s" data-type="%s" class="request-clinician-table btn thm-btn pl-2 pr-2 pt-1 pb-1" title="Request for Clinicians"><i class="fa fa-plus"></i> Request Clinicians</a></div>',
+                $shift['id'],
+                $shift['shift_type']
+            );
 
             $shift['clinicians'] = $this->shiftCliniciansModel
                 ->select('tbl_clinicians.name as clinician_id, tbl_clinicians.name as clinician_name, tbl_clinicians.profile_pic_url, tbl_shift_clinicians.*')
@@ -148,6 +157,31 @@ class Shifts extends BaseController
                 ->where('tbl_shift_clinicians.shift_status', 0)
                 ->where('tbl_shift_clinicians.shift_id', $shift['id'])
                 ->findAll();
+
+            foreach ($shift['clinicians'] as &$clinician) {
+                $punchIn = $this->shiftsTimekeepingModel
+                    ->where('shift_id', $shift['id'])
+                    ->where('clinician_id', $clinician['clinician_id'])
+                    ->where('punch_type', 10)
+                    ->orderBy('punch_datetime', 'asc')
+                    ->first();
+
+
+                $clinician['is_clocked_in'] = (!empty($punchIn));
+            }
+
+            // check if clinician is already logged in on the current shift, if yes, don't show alternative units
+            $shift['alternative_units'] = $this->shiftsModel
+                ->select('tbl_shifts.id as shift_id, tbl_client_units.name as unit_name')
+                ->join('tbl_client_units', 'tbl_client_units.id = tbl_shifts.unit_id', 'inner')
+                ->where('tbl_shifts.client_id', $facilityId)
+                ->where('tbl_shifts.start_date', $shift['start_date'])
+                ->where('tbl_shifts.shift_type', $shift['shift_type'])
+                ->where('tbl_shifts.shift_start_time', $shift['shift_start_time'])
+                ->where('tbl_shifts.shift_end_time', $shift['shift_end_time'])
+                ->where('tbl_shifts.unit_id !=', $shift['unit_id'])
+                ->where('tbl_shifts.status', 1)
+                ->findAll();
         }
 
         return $this->response->setJSON([
@@ -155,5 +189,42 @@ class Shifts extends BaseController
             'message' => '',
             'data' => $shifts
         ]);
+    }
+
+    public function transfer()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Invalid request.']);
+        }
+
+        $facilityId = $this->session->get('facility_id');
+        if ($facilityId == 0) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Unauthorized.']);
+        }
+
+        $shiftClinicianID = $this->request->getPost('shift_clinician_id');
+        $newShiftID = $this->request->getPost('new_shift_id');
+
+        $shiftClinician = $this->shiftCliniciansModel->find($shiftClinicianID);
+        if (!$shiftClinician) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Clinician record not found.']);
+        }
+
+        $oldShift = $this->shiftsModel->find($shiftClinician['shift_id']);
+        $newShift = $this->shiftsModel->find($newShiftID);
+
+        if (!$newShift || $newShift['client_id'] != $facilityId) {
+            return $this->response->setJSON(['success' => 0, 'message' => 'Target shift not found or unauthorized.']);
+        }
+
+        if ($this->shiftCliniciansModel->update($shiftClinicianID, ['shift_id' => $newShiftID])) {
+            return $this->response->setJSON([
+                'success' => 1,
+                'message' => 'Clinician transferred successfully.',
+                'message_header' => 'Transfer Success'
+            ]);
+        }
+
+        return $this->response->setJSON(['success' => 0, 'message' => 'Failed to transfer clinician.']);
     }
 }

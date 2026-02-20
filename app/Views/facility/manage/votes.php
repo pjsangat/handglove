@@ -41,18 +41,46 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-group">
-                                    <label for="">Voting Duration</label>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control datepicker" readonly autocomplete="off" name="voting_start_date" id="voting_start_date" placeholder="Voting Start Date">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control datepicker" readonly autocomplete="off" name="voting_end_date" id="voting_end_date" placeholder="Voting End Date">
-                                        </div>
-                                    </div>
+                                    <label for="">Weekly Voting Schedule</label>
+                                    <select name="voting_week" id="voting_week" class="form-control selectpicker" data-title="Select Week">
+                                        <?php 
+                                            $today = new DateTime();
+                                            // Find the previous Monday (or today if it's Monday)
+                                            if ($today->format('N') != 1) {
+                                                $today->modify('last monday');
+                                            }
+                                            
+                                            // Start from the current week and generate 12 weeks forward
+                                            $start = clone $today;
+                                            
+                                            for($i = 0; $i < 12; $i++) {
+                                                $weekStart = clone $start;
+                                                $weekEnd = clone $start;
+                                                $weekEnd->modify('+6 days');
+                                                
+                                                $value = $weekStart->format('Y-m-d') . '|' . $weekEnd->format('Y-m-d');
+                                                $label = "Week of " . $weekStart->format('M d, Y') . " - " . $weekEnd->format('M d, Y');
+                                                
+                                                // $selected = ($i == 0) ? 'selected' : '';
+                                                
+                                                echo "<option value=\"$value\">$label</option>";
+                                                $start->modify('+1 week');
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Voting Type</label>
+                                    <select name="voting_type" id="voting_type" class="form-control selectpicker" data-title="Select Type">
+                                        <option value="gna">GNA</option>
+                                        <option value="nurse">Nurse</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -68,11 +96,16 @@
                                     <label for="">Clinicians</label>
                                     <div id="clinician-list">
                                         <?php foreach($clinicians as $clinician){ ?>
-                                        <div class="clincian-checkbox">
+                                        <div class="clincian-checkbox <?php echo $clinician['clinician_type_grouping']; ?>">
                                             <label for="clinician-<?php echo $clinician['id']; ?>" class="image-checkbox">
                                                 <img class="img-responsive" src="<?php echo $clinician['profile_pic_url'] != '' ? $clinician['profile_pic_url'] : base_url('assets/img/blank-img.png'); ?>" />
                                                 <input type="checkbox" name="clincian[]" id="clinician-<?php echo $clinician['id']; ?>" value="<?php echo $clinician['id']; ?>">
                                             </label>
+                                            <div>
+                                                <strong><?php echo $clinician['name']; ?></strong><br>
+                                                <?php echo $clinician['clinician_type_name']; ?>
+                                            </div>
+
                                         </div>
                                         <?php }?>
                                     </div>
@@ -124,6 +157,14 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <label for="">Voting Type</label>
+                                    <div id="unitVotingType"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label for="">Description</label>
                                     <div id="unitDescription"></div>
                                 </div>
@@ -138,11 +179,6 @@
                             </div>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <div class="buttons">
-                        <a href="javascript:;" class="btn thm-btn" id="updateUnit">Update</a>
-                    </div>
                 </div>
             </div>
         </div>

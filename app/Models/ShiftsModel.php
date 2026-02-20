@@ -13,7 +13,7 @@ class ShiftsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['client_id', 'start_date', 'shift_type', 'shift_start_time', 'shift_end_time', 'slots', 'rate', 'unit_id', 'status'];
+    protected $allowedFields    = ['client_id', 'start_date', 'end_date', 'shift_type', 'shift_start_time', 'shift_end_time', 'slots', 'rate', 'unit_id', 'status'];
 
     // Dates
     protected $useTimestamps = false;
@@ -104,5 +104,32 @@ class ShiftsModel extends Model
         
         $query = $builder->get();
         return $query->getResultArray();
+    }
+
+    public function hasActiveShift($clientId)
+    {
+        return $this->where('client_id', $clientId)
+            ->where('start_date', date("Y-m-d"))
+            ->where('status', 1)
+            ->countAllResults() > 0;
+    }
+
+    public function hasActiveShiftThisWeek($clientId)
+    {
+        $startOfWeek = date("Y-m-d", strtotime('monday this week'));
+        
+        for ($i = 0; $i < 7; $i++) {
+            $currentDate = date("Y-m-d", strtotime("$startOfWeek +$i days"));
+            $count = $this->where('client_id', $clientId)
+                ->where('start_date', $currentDate)
+                ->where('status', 1)
+                ->countAllResults();
+            
+            if ($count === 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

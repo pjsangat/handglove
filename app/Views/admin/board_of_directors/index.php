@@ -5,10 +5,10 @@
     <div class="col-12">
         <div class="heading d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2>Board of Directors</h2>
-                <div class="kicker-bottom">Manage Board of Directors</div>
+                <h2>Board of Advisors</h2>
+                <div class="kicker-bottom">Manage Board of Advisors</div>
             </div>
-            <a href="<?= base_url('admin/board-of-directors/create') ?>" class="btn thm-btn">Add Member</a>
+            <a href="<?= base_url('admin/board-of-directors/create') ?>" class="btn thm-btn">Add Advisor</a>
         </div>
 
         <?php if (session()->getFlashdata('message')): ?>

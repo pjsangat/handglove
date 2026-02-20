@@ -78,11 +78,21 @@ defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database 
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
 
+defined('ENVIRONMENT') || define('ENVIRONMENT', 'development');
+
+if (PHP_SAPI === 'cli' || !isset($_SERVER['SERVER_NAME'])) {
+    $_SERVER['SERVER_NAME'] = 'localhost';
+}
+
+if (PHP_SAPI === 'cli' || !isset($_SERVER['SCRIPT_NAME'])) {
+    $_SERVER['SCRIPT_NAME'] = 'index.php';
+}
+
 define('DOMAIN', $_SERVER['SERVER_NAME']);
-define('DOMAIN_URL', (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['SERVER_NAME'] . '/');
-define('BASE_URL', (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['SERVER_NAME'] . str_replace('index.php', '', $_SERVER['SCRIPT_NAME']));
+define('DOMAIN_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['SERVER_NAME'] . '/');
+define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['SERVER_NAME'] . str_replace('index.php', '', $_SERVER['SCRIPT_NAME']));
 define('BASE_URL_PATH', str_replace('index.php', '', $_SERVER['SCRIPT_NAME']));
-define('IS_HTTPS_ENABLED', isset($_SERVER['HTTPS']) ? true : false);
+define('IS_HTTPS_ENABLED', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? true : false);
 
 switch (ENVIRONMENT) {
     case 'production':
