@@ -86,7 +86,24 @@ class Facility extends BaseController
                 $workFriendlyVal += 30;
             }
 
+            $objRatings = new ClientRatingsModel();
+            $aggregatesData = $objRatings->select('AVG(cleanliness) as cleanliness, AVG(work_environment) as work_environment, AVG(tools_needed) as tools_needed, AVG(average) as average')
+                ->where('client_id', $session->get('facility_id'))
+                ->first();
 
+            $aggregates = [
+                'cleanliness' => number_format($aggregatesData['cleanliness'] ?? 0, 2),
+                'work_environment' => number_format($aggregatesData['work_environment'] ?? 0, 2),
+                'tools_needed' => number_format($aggregatesData['tools_needed'] ?? 0, 2),
+                'average' => number_format($aggregatesData['average'] ?? 0, 2),
+                'average_percentage' => ($aggregatesData['average'] ?? 0) / 5 * 100
+            ];
+
+            if ($aggregates['average_percentage'] > 0) {
+                // Get the percentage value of average_percentage relative to 30 points
+                $ratingBonus = ($aggregates['average_percentage'] / 100) * 30;
+                $workFriendlyVal += ceil($ratingBonus);
+            }
             $data['workFriendly'] = $workFriendlyVal;
 
             $data['units'] = $units;
